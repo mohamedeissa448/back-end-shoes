@@ -4,9 +4,12 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors=require('cors')
+var bodyParser=require('body-parser')
+var mongoose=require('mongoose')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var bodyParser=require('body-parser')
+var productsRouter=require('./routes/products-router');
+
 var app = express();
 
 // view engine setup
@@ -14,18 +17,20 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded())
+app.use(bodyParser.json({extended:false}));
+app.use(bodyParser.urlencoded({extended:false}))
 
 app.use(express.static(path.join(__dirname, 'public')));
+//connect to DB
+mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,useUnifiedTopology:true })
+.then(()=>console.log("connected to DB"))
+.catch(()=>console.log("Couldn't connect to DB"))
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
+app.use('/products', productsRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
