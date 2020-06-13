@@ -1,11 +1,14 @@
 var mongoose = require('mongoose');
 
 var Ogt_ProductColor_VariantsSchema = mongoose.Schema({
-    Color_Variants              : {
+    Color_Variants                 : {
         type:[mongoose.Schema.Types.ObjectId],
         ref:'ogt_lut_color_variants'
     },
-    Color_Variants_ImageURLs    : [String]
+    Color_Variants_Images_Media    : [{
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'ogt_media'
+    }]
 })
 
 var Ogt_ProductSchema =new mongoose.Schema({
@@ -16,7 +19,10 @@ var Ogt_ProductSchema =new mongoose.Schema({
         ref:'ogt_lut_size_variants'
     }],
     Product_Color_Variants                           : [Ogt_ProductColor_VariantsSchema],
-    Product_DefaultImages_Urls     	                 : [String],
+    Product_DefaultImages_Media     	             : [{
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'ogt_media'
+    }],
 
     Product_MainUnit                                 :{ // وحده الصنف الكبري
         type:[mongoose.Schema.Types.ObjectId],
