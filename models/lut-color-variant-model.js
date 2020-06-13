@@ -5,6 +5,7 @@ var colorVariantsSchema = mongoose.Schema({
     Color_Name     	        : String,
     Color_Icon_Image_Url    : String,
     Color_Description       : String,
+    Color_IsActive          : Boolean
 });
 
 

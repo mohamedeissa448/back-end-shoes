@@ -43,6 +43,7 @@ var Ogt_ProductSchema =new mongoose.Schema({
     
     Product_SellingPrice                             : Number,
     Product_MinStocklimit                            : Number, // حد الطلب
+    Product_IsActive                                 : Boolean
    
 });
 const product=mongoose.model('ogt_product',Ogt_ProductSchema);

@@ -4,6 +4,7 @@ var sizeVariantsSchema = mongoose.Schema({
     
     Size_Name     	        : String,
     Size_Description     	: String,
+    Size_IsActive           : Boolean
     
 });
 
