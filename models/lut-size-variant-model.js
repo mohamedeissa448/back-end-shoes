@@ -2,7 +2,8 @@ var mongoose = require('mongoose');
 
 var sizeVariantsSchema = mongoose.Schema({
     
-    Size_Name     	  : String,
+    Size_Name     	        : String,
+    Size_Description     	: String,
     
 });
 

@@ -1,21 +1,43 @@
 var mongoose = require('mongoose');
-var productSchema =new mongoose.Schema({
+
+var Ogt_ProductColor_VariantsSchema = mongoose.Schema({
+    Color_Variants              : {
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'ogt_lut_color_variants'
+    },
+    Color_Variants_ImageURLs    : [String]
+})
+
+var Ogt_ProductSchema =new mongoose.Schema({
+    Product_Code     		                        : Number,
+    Product_Name     		                        : String,
+    Product_Size_Variants     : [{
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'ogt_lut_size_variants'
+    }],
+    Product_Color_Variants                           : [Ogt_ProductColor_VariantsSchema],
+    Product_DefaultImages_Urls     	                 : [String],
+
+    Product_MainUnit                                 :{ // وحده الصنف الكبري
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'lut_product_unit'
+    },
+
+    Product_MiddleUnit                               :{ // وحده الصنف الوسطي
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'lut_product_unit'
+    },
+    Product_MiddleUnitCountInMainUnit                : Number, //عدد الوحدات الوسطى المتواجدة في الوحدة الكبرى
     
-	Product_Code     		: String,
-    Size_Variants     		: {
+    Product_SmallUnit                                :{ //وحده الصنف الصغري
         type:[mongoose.Schema.Types.ObjectId],
-        ref:'size_variants'
+        ref:'lut_product_unit'
     },
-    Size_Colors             :{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:'color_variants'
-    },
-    Images_Urls     	    : [String],
-    Maximum_Unit            : Number,// وحده الصنف الكبري
-    Medium_Unit             : Number,// وحده الصنف الوسطي
-    Minimum_Unit            : Number,//وحده الصنف الصغري
-    Sell_Price              : Number
+    Product_SmallUnitCountInMiddleUnit               : Number, //عدد الوحدات الصعرى المتواجدة في الوحدة المتوسطة
+    
+    Product_SellingPrice                             : Number,
+    Product_MinStocklimit                            : Number, // حد الطلب
    
 });
-const product=mongoose.model('product',productSchema);
+const product=mongoose.model('ogt_product',Ogt_ProductSchema);
 module.exports=product;
