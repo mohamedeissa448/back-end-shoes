@@ -8,7 +8,11 @@ var bodyParser=require('body-parser')
 var mongoose=require('mongoose')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var productsRouter=require('./routes/products-router');
+var productsRouter=require('./routes/products-route');
+var colorsRouter=require('./routes/color-route');
+var sizesRouter=require("./routes/size-route");
+var mediaRouter=require("./routes/media-route");
+var productUnitsRouter=require('./routes/productUnit-route');
 
 var app = express();
 
@@ -31,6 +35,11 @@ mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,us
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);
+app.use('/colors', colorsRouter);
+app.use('/sizes', sizesRouter);
+app.use('/productUnits', productUnitsRouter);
+app.use('/media', mediaRouter);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
