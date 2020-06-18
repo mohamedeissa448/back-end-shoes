@@ -6,8 +6,8 @@ router.post('/addSize',async function(req, res, next) {
     await(sizeController.addSize(req, res));
 });
 
-router.post('/editSize',async function(req, res, next) {
-    await(sizeController.editSize(req, res));
+router.post('/editSizeById',async function(req, res, next) {
+    await(sizeController.editSizeById(req, res));
 });
 
 router.get('/getAll',async function(req, res, next) {

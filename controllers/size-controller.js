@@ -5,7 +5,6 @@ module.exports={
         const newSize=new Size();
         newSize.Size_Name=req.body.Size_Name;
         newSize.Size_Description=req.body.Size_Description;
-        newSize.Size_IsActive=req.body.Size_IsActive;
         newSize.save((err,document)=>{
             if(err){
                 return res.send({
@@ -19,7 +18,7 @@ module.exports={
         })
     },
 
-    editSize:(req,res)=>{
+    editSizeById:(req,res)=>{
         var updatedSize={}
         updatedSize.Size_Name=req.body.Size_Name;
         updatedSize.Size_Description=req.body.Size_Description;

@@ -6,8 +6,8 @@ router.post('/addProductUnit',async function(req, res, next) {
     await(productUnitController.addProductUnit(req, res));
 });
 
-router.post('/editProductUnit',async function(req, res, next) {
-    await(productUnitController.editProductUnit(req, res));
+router.post('/editProductUnitById',async function(req, res, next) {
+    await(productUnitController.editProductUnitById(req, res));
 });
 
 router.get('/getAll',async function(req, res, next) {

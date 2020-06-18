@@ -16,7 +16,7 @@ var Ogt_ProductSchema =new mongoose.Schema({
     Product_Name     		                        : String,
     Product_Size_Variants     : [{
         type:[mongoose.Schema.Types.ObjectId],
-        ref:'ogt_lut_size_variants'
+        ref:'lut_size_variants'
     }],
     Product_Color_Variants                           : [Ogt_ProductColor_VariantsSchema],
     Product_DefaultImages_Media     	             : [{

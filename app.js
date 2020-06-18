@@ -5,7 +5,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors=require('cors')
 var bodyParser=require('body-parser')
-var mongoose=require('mongoose')
+var mongoose=require('mongoose');
+const passport = require("passport");
+const authenticate = require("./authenticate");
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var productsRouter=require('./routes/products-route');
@@ -27,6 +30,7 @@ app.use(bodyParser.json({extended:false}));
 app.use(bodyParser.urlencoded({extended:false}))
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(passport.initialize());
 //connect to DB
 mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,useUnifiedTopology:true })
 .then(()=>console.log("connected to DB"))

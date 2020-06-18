@@ -4,7 +4,10 @@ var colorVariantsSchema = mongoose.Schema({
     
     ProductUnit_Name     	        : String,
     ProductUnit_Description         : String,
-    ProductUnit_IsActive            : Boolean
+    ProductUnit_IsActive            : {
+        type:Boolean,
+        default:true,
+    }
 });
 
 

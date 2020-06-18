@@ -5,7 +5,6 @@ module.exports={
         const newUnit=new Unit();
         newUnit.ProductUnit_Name=req.body.ProductUnit_Name;
         newUnit.ProductUnit_Description=req.body.ProductUnit_Description;
-        newUnit.ProductUnit_IsActive=req.body.ProductUnit_IsActive;
         newUnit.save((err,document)=>{
             if(err){
                 return res.send({
@@ -19,7 +18,7 @@ module.exports={
         })
     },
 
-    editProductUnit:(req,res)=>{
+    editProductUnitById:(req,res)=>{
         var updatedUnit={}
         updatedUnit.ProductUnit_Name=req.body.ProductUnit_Name;
         updatedUnit.ProductUnit_Description=req.body.ProductUnit_Description;
