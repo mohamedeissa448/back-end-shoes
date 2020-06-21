@@ -4,7 +4,7 @@ module.exports={
     addColor:(req,res)=>{
         const newColor=new Color();
         newColor.Color_Name=req.body.Color_Name;
-        newColor.Color_Icon_Image_Url=req.body.Color_Icon_Image_Url;//might needs modification in future 
+        newColor.Color_HexaDecimalBasedValue=req.body.Color_HexaDecimalBasedValue;//might needs modification in future 
         newColor.Color_Description=req.body.Color_Description;
         newColor.Color_IsActive=req.body.Color_IsActive;
         newColor.save((err,document)=>{
@@ -23,7 +23,7 @@ module.exports={
     editColor:(req,res)=>{
         var updatedColor={}
         updatedColor.Color_Name=req.body.Color_Name;
-        updatedColor.Color_Icon_Image_Url=req.body.Color_Icon_Image_Url;
+        updatedColor.Color_HexaDecimalBasedValue=req.body.Color_HexaDecimalBasedValue;
         updatedColor.Color_Description=req.body.Color_Description;
         updatedColor.Color_IsActive=req.body.Color_IsActive
         
