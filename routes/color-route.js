@@ -7,8 +7,8 @@ router.post('/addColor',async function(req, res, next) {
  ;
 });
 
-router.post('/editColor',async function(req, res, next) {
-    await(colorController.editColor(req, res));
+router.post('/editColorById',async function(req, res, next) {
+    await(colorController.editColorById(req, res));
 });
 
 router.get('/getAll',async function(req, res, next) {
