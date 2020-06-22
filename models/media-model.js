@@ -1,9 +1,9 @@
 var mongoose = require('mongoose');
 
 var Ogt_MediaSchema =new mongoose.Schema({
-    Media_Type     		            : String, // String and on of:  Video, Image, Document 
+    Media_Type     		            : String, // String and on off:  Video, Image, Document 
     Media_Title                     : String,
-    Media_MetaTags                  :[String],// String used for search engien optimization
+    Media_MetaTags                  :[String],// String used for search engine optimization
     Media_AlternativeText           : String,
     Media_Describtion               : String,
     Media_xLargImageUrl             : String, // FHD Image w: 1920 x h: 1080

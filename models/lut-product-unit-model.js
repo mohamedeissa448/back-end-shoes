@@ -11,5 +11,5 @@ var colorVariantsSchema = mongoose.Schema({
 });
 
 
-const color = mongoose.model('lut_product_unit', colorVariantsSchema);
-module.exports = color;
+const productUnit = mongoose.model('lut_product_unit', colorVariantsSchema);
+module.exports = productUnit;
