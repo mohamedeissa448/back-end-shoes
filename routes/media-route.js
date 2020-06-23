@@ -6,8 +6,8 @@ router.post('/addMedia',async function(req, res, next) {
     await(mediaController.addMedia(req, res));
 });
 
-router.post('/editMedia',async function(req, res, next) {
-    await(mediaController.editMedia(req, res)); 
+router.post('/editMediaById',async function(req, res, next) {
+    await(mediaController.editMediaById(req, res)); 
 });
 
 router.get('/getAll',async function(req, res, next) {
