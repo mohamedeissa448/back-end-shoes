@@ -35,7 +35,7 @@ var Hcm_SupplierSchema = mongoose.Schema(
         type: [mongoose.Schema.Types.ObjectId],
         ref:'lut_way_of_delivery'
     }],
-    Supplier_Contact: [
+    Supplier_Contacts: [
       {
         Supplier_ContactTitle: String,
         Supplier_ContactName: String,
