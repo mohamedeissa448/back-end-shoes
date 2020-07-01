@@ -1,7 +1,12 @@
 var Size=require("../models/lut-size-variant-model");
 var Unit=require("../models/lut-product-unit-model");
 var Color=require("../models/lut-color-variant-model");
-var Material=require("../models/lut-product-material-model")
+var Material=require("../models/lut-product-material-model");
+var Class=require("../models/lut-class-model");
+var Country=require("../models/lut-country-model");
+var Payment=require("../models/lut-payment-method-model");
+var Delivery=require("../models/lut-way-of-delivery-model");
+
 module.exports={
     /***********Size Variant************* */
     addSize:(req,res)=>{
@@ -377,6 +382,382 @@ module.exports={
             }else{
                 return res.send({
                     message:"Material is null"
+                })
+            }
+
+        })
+    },
+
+     /*********** Classes ************* */
+     addClass:(req,res)=>{
+        const newClass=new Class();
+        newClass.Class_Name=req.body.Class_Name;
+        newClass.Class_Description=req.body.Class_Description;
+        newClass.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editClassById:(req,res)=>{
+        var updatedClass={}
+        updatedClass.Class_Name=req.body.Class_Name;
+        updatedClass.Class_Description=req.body.Class_Description;
+        updatedClass.Class_IsActive=req.body.Class_IsActive;
+
+            Class.findByIdAndUpdate(req.body['_id'],updatedClass,{new: true},
+            (err,Class)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(Class) {
+                    return res.send({
+                        message:true,
+                        data:{ newClass:Class }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated Class is null"
+                    })
+                }
+            })
+    },
+
+    getAllClasses:(req,res)=>{
+        Class.find({}).exec((err,Classs)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(Classs) {
+                return res.send(Classs)
+            }else{
+                return res.send({
+                    message:"Classs are null"
+                })
+            }
+
+        })
+    },
+
+    getAllClassesActive:(req,res)=>{
+        Class.find({Class_IsActive:true}).exec((err,activeClasss)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activeClasss) {
+                return res.send(activeClasss)
+            }else{
+                return res.send({
+                    message:"Classs are null"
+                })
+            }
+
+        })
+    },
+
+    getOneClassById:(req,res)=>{
+        Class.findById(req.body['_id']).exec((err,Class)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(Class) {
+                return res.send(Class)
+            }else{
+                return res.send({
+                    message:"Class is null"
+                })
+            }
+
+        })
+    },
+
+     /*********** Countries ************* */
+     addCountry:(req,res)=>{
+        const newCountry=new Country();
+        newCountry.Country_Name=req.body.Country_Name;
+        newCountry.Country_ShortCode=req.body.Country_ShortCode;
+        newCountry.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editCountryById:(req,res)=>{
+        var updatedCountry={}
+        updatedCountry.Country_Name=req.body.Country_Name;
+        updatedCountry.Country_ShortCode=req.body.Country_ShortCode;
+        updatedCountry.Country_IsActive=req.body.Country_IsActive;
+
+            Country.findByIdAndUpdate(req.body['_id'],updatedCountry,{new: true},
+            (err,country)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(country) {
+                    return res.send({
+                        message:true,
+                        data:{ newCountry:country }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated country is null"
+                    })
+                }
+            })
+    },
+
+    getAllCountries:(req,res)=>{
+        Country.find({}).exec((err,countries)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(countries) {
+                return res.send(countries)
+            }else{
+                return res.send({
+                    message:"countries are null"
+                })
+            }
+
+        })
+    },
+
+    getAllCountriesActive:(req,res)=>{
+        Country.find({Country_IsActive:true}).exec((err,activeCountries)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activeCountries) {
+                return res.send(activeCountries)
+            }else{
+                return res.send({
+                    message:"Countries are null"
+                })
+            }
+
+        })
+    },
+
+    getOneCountryById:(req,res)=>{
+        Country.findById(req.body['_id']).exec((err,Country)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(Country) {
+                return res.send(Country)
+            }else{
+                return res.send({
+                    message:"Country is null"
+                })
+            }
+
+        })
+    },
+
+     /*********** payment methods ************* */
+     addPayment:(req,res)=>{
+        const newPayment=new Payment();
+        newPayment.PaymentMethod_Name=req.body.PaymentMethod_Name;
+        newPayment.PaymentMethod_Description=req.body.PaymentMethod_Description;
+        newPayment.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editPaymentById:(req,res)=>{
+        var updatedPayment={}
+        updatedPayment.PaymentMethod_Name=req.body.PaymentMethod_Name;
+        updatedPayment.PaymentMethod_Description=req.body.PaymentMethod_Description;
+        updatedPayment.PaymentMethod_IsActive=req.body.PaymentMethod_IsActive;
+
+            Payment.findByIdAndUpdate(req.body['_id'],updatedPayment,{new: true},
+            (err,payment)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(payment) {
+                    return res.send({
+                        message:true,
+                        data:{ newPayment:payment }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated payment is null"
+                    })
+                }
+            })
+    },
+
+    getAllPayments:(req,res)=>{
+        Country.find({}).exec((err,payments)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(payments) {
+                return res.send(payments)
+            }else{
+                return res.send({
+                    message:"payments are null"
+                })
+            }
+
+        })
+    },
+
+    getAllPaymentsActive:(req,res)=>{
+        Payment.find({PaymentMethod_IsActive:true}).exec((err,activePayments)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activePayments) {
+                return res.send(activePayments)
+            }else{
+                return res.send({
+                    message:"Payments are null"
+                })
+            }
+
+        })
+    },
+
+    getOnePaymentById:(req,res)=>{
+        Payment.findById(req.body['_id']).exec((err,payment)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(payment) {
+                return res.send(payment)
+            }else{
+                return res.send({
+                    message:"payment is null"
+                })
+            }
+
+        })
+    },
+
+    /*********** ways of deliveries ************* */
+    addDelivery:(req,res)=>{
+        const newDelivery=new Delivery();
+        newDelivery.WayOfDeliverySchema_Name=req.body.WayOfDeliverySchema_Name;
+        newDelivery.WayOfDeliverySchema_Description=req.body.WayOfDeliverySchema_Description;
+        newDelivery.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editDeliveryById:(req,res)=>{
+        var updatedDelivery={}
+        updatedDelivery.WayOfDeliverySchema_Name=req.body.WayOfDeliverySchema_Name;
+        updatedDelivery.WayOfDeliverySchema_Description=req.body.WayOfDeliverySchema_Description;
+        updatedDelivery.WayOfDeliverySchema_IsActive=req.body.WayOfDeliverySchema_IsActive;
+
+            Delivery.findByIdAndUpdate(req.body['_id'],updatedDelivery,{new: true},
+            (err,delivery)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(delivery) {
+                    return res.send({
+                        message:true,
+                        data:{ newDelivery:delivery }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated Delivery is null"
+                    })
+                }
+            })
+    },
+
+    getAllDeliveries:(req,res)=>{
+        Delivery.find({}).exec((err,deliveries)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(deliveries) {
+                return res.send(deliveries)
+            }else{
+                return res.send({
+                    message:"deliveries are null"
+                })
+            }
+
+        })
+    },
+
+    getAllDeliveriesActive:(req,res)=>{
+        Delivery.find({WayOfDeliverySchema_IsActive:true}).exec((err,activeDeliveries)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activeDeliveries) {
+                return res.send(activeDeliveries)
+            }else{
+                return res.send({
+                    message:"deliveries are null"
+                })
+            }
+
+        })
+    },
+
+    getOneDeliveryById:(req,res)=>{
+        Delivery.findById(req.body['_id']).exec((err,delivery)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(delivery) {
+                return res.send(delivery)
+            }else{
+                return res.send({
+                    message:"delivery is null"
                 })
             }
 

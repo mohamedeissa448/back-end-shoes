@@ -7,7 +7,7 @@ module.exports={
             else InsertIntoProduct(1, user[0]);
         });
         function InsertIntoProduct(NextCode, user) {
-            const newProduct=new Product();
+            let newProduct=new Product();
             newProduct.Product_Name=req.body.Product_Name
             newProduct.Product_Size_Variants=req.body.Product_Size_Variants
             newProduct.Product_Color_Variants=req.body.Product_Color_Variants

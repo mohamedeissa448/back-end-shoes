@@ -91,5 +91,92 @@ router.post('/productMaterials/getOneProductMaterialById',async function(req, re
     await(sysSetupController.getOneProductMaterialById(req, res));
 });
 
+/**************   class routes           ********** */
+
+router.post('/classes/addClass',async function(req, res, next) {
+    await(sysSetupController.addClass(req, res));
+});
+
+router.post('/classes/editClassById',async function(req, res, next) {
+    await(sysSetupController.editClassById(req, res));
+});
+
+router.get('/classes/getAllClasses',async function(req, res, next) {
+    await(sysSetupController.getAllClasses(req, res));
+});
+
+router.get('/classes/getAllClassesActive',async function(req, res, next) {
+    await(sysSetupController.getAllClassesActive(req, res));
+});
+
+router.post('/classes/getOneClassById',async function(req, res, next) {
+    await(sysSetupController.getOneClassById(req, res));
+});
+
+/**************   Country routes           ********** */
+
+router.post('/countries/addCountry',async function(req, res, next) {
+    await(sysSetupController.addCountry(req, res));
+});
+
+router.post('/countries/editCountryById',async function(req, res, next) {
+    await(sysSetupController.editCountryById(req, res));
+});
+
+router.get('/countries/getAllCountries',async function(req, res, next) {
+    await(sysSetupController.getAllCountries(req, res));
+});
+
+router.get('/countries/getAllCountriesActive',async function(req, res, next) {
+    await(sysSetupController.getAllCountriesActive(req, res));
+});
+
+router.post('/countries/getOneCountryById',async function(req, res, next) {
+    await(sysSetupController.getOneCountryById(req, res));
+});
+
+/**************   payment methods routes           ********** */
+
+router.post('/payments/addPayment',async function(req, res, next) {
+    await(sysSetupController.addPayment(req, res));
+});
+
+router.post('/payments/editPaymentById',async function(req, res, next) {
+    await(sysSetupController.editPaymentById(req, res));
+});
+
+router.get('/payments/getAllPayments',async function(req, res, next) {
+    await(sysSetupController.getAllPayments(req, res));
+});
+
+router.get('/payments/getAllPaymentsActive',async function(req, res, next) {
+    await(sysSetupController.getAllPaymentsActive(req, res));
+});
+
+router.post('/payments/getOnePaymentById',async function(req, res, next) {
+    await(sysSetupController.getOnePaymentById(req, res));
+});
+
+/**************   ways of delivery routes           ********** */
+
+router.post('/deliveries/addDelivery',async function(req, res, next) {
+    await(sysSetupController.addDelivery(req, res));
+});
+
+router.post('/deliveries/editDeliveryById',async function(req, res, next) {
+    await(sysSetupController.editDeliveryById(req, res));
+});
+
+router.get('/deliveries/getAllDeliveries',async function(req, res, next) {
+    await(sysSetupController.getAllDeliveries(req, res));
+});
+
+router.get('/deliveries/getAllDeliveriesActive',async function(req, res, next) {
+    await(sysSetupController.getAllDeliveriesActive(req, res));
+});
+
+router.post('/deliveries/getOneDeliveryById',async function(req, res, next) {
+    await(sysSetupController.getOneDeliveryById(req, res));
+});
 
 module.exports = router;
