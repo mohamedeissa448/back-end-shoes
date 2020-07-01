@@ -14,10 +14,14 @@ var Ogt_ProductColor_VariantsSchema = mongoose.Schema({
 var Ogt_ProductSchema =new mongoose.Schema({
     Product_Code     		                        : Number,
     Product_Name     		                        : String,
+    Product_Categories                              :[{
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'category'
+    }],
     Product_Material                                :{
         type:[mongoose.Schema.Types.ObjectId],
         ref:'lut_product_material'
-    } ,
+    },
     Product_Size_Variants     : [{
         type:[mongoose.Schema.Types.ObjectId],
         ref:'lut_size_variants'
