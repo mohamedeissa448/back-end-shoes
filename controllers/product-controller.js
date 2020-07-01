@@ -2,36 +2,40 @@ var Product=require("../models/product-model");
 
 module.exports={
     addProduct:(req,res)=>{
-        const newProduct=new Product();
-        newProduct.Product_Code=req.body.Product_Code
-        newProduct.Product_Name=req.body.Product_Name
-        newProduct.Product_Size_Variants=req.body.Product_Size_Variants
-        newProduct.Product_Color_Variants=req.body.Product_Color_Variants
-        newProduct.Product_DefaultImages_Media=req.body.Product_DefaultImages_Media
-        newProduct.Product_MainUnit=req.body.Product_MainUnit
-        newProduct.Product_MiddleUnit=req.body.Product_MiddleUnit
-        newProduct.Product_MiddleUnitCountInMainUnit=req.body.Product_MiddleUnitCountInMainUnit
-        newProduct.Product_SmallUnit=req.body.Product_SmallUnit
-        newProduct.Product_SmallUnitCountInMiddleUnit=req.body.Product_SmallUnitCountInMiddleUnit
-        newProduct.Product_SellingPrice=req.body.Product_SellingPrice
-        newProduct.Product_MinStocklimit=req.body.Product_MinStocklimit
-        newProduct.Product_IsActive=req.body.Product_IsActive;
-        newProduct.save((err,document)=>{
-            if(err){
-                return res.send({
-                    message:err
-                })
-            }else {
-                return res.send({
-                    message:true
-                })
-            }
-        })
+        Product.getLastCode(function(err, product) {
+            if (product) InsertIntoProduct(product.Product_Code + 1);
+            else InsertIntoProduct(1, user[0]);
+        });
+        function InsertIntoProduct(NextCode, user) {
+            const newProduct=new Product();
+            newProduct.Product_Name=req.body.Product_Name
+            newProduct.Product_Size_Variants=req.body.Product_Size_Variants
+            newProduct.Product_Color_Variants=req.body.Product_Color_Variants
+            newProduct.Product_DefaultImages_Media=req.body.Product_DefaultImages_Media
+            newProduct.Product_MainUnit=req.body.Product_MainUnit
+            newProduct.Product_MiddleUnit=req.body.Product_MiddleUnit
+            newProduct.Product_MiddleUnitCountInMainUnit=req.body.Product_MiddleUnitCountInMainUnit
+            newProduct.Product_SmallUnit=req.body.Product_SmallUnit
+            newProduct.Product_SmallUnitCountInMiddleUnit=req.body.Product_SmallUnitCountInMiddleUnit
+            newProduct.Product_SellingPrice=req.body.Product_SellingPrice
+            newProduct.Product_MinStocklimit=req.body.Product_MinStocklimit
+            newProduct.save((err,document)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else {
+                    return res.send({
+                        message:true
+                    })
+                }
+            })
+        }
+        
     },
 
     editProduct:(req,res)=>{
         var updatedProduct={}
-        updatedProduct.Product_Code=req.body.Product_Code
         updatedProduct.Product_Name=req.body.Product_Name
         updatedProduct.Product_Size_Variants=req.body.Product_Size_Variants
         updatedProduct.Product_Color_Variants=req.body.Product_Color_Variants
@@ -65,7 +69,16 @@ module.exports={
     },
 
     getAll:(req,res)=>{
-        Product.find({}).exec((err,products)=>{
+        Product.find({})
+        .populate({ path: 'Product_Material'})
+        .populate({ path: 'Product_Size_Variants'})
+        .populate({ path: 'Product_Color_Variants'})
+        .populate({ path: 'Product_DefaultImages_Media'})
+        .populate({ path: 'Product_MainUnit'})
+        .populate({ path: 'Product_MiddleUnit'})
+        .populate({ path: 'Product_SmallUnit'})
+
+        .exec((err,products)=>{
             if(err){
                 return res.send({
                     message:err
@@ -82,7 +95,15 @@ module.exports={
     },
 
     getAllActive:(req,res)=>{
-        Product.find({Product_IsActive:true}).exec((err,activeProducts)=>{
+        Product.find({Product_IsActive:true})
+        .populate({ path: 'Product_Material'})
+        .populate({ path: 'Product_Size_Variants'})
+        .populate({ path: 'Product_Color_Variants'})
+        .populate({ path: 'Product_DefaultImages_Media'})
+        .populate({ path: 'Product_MainUnit'})
+        .populate({ path: 'Product_MiddleUnit'})
+        .populate({ path: 'Product_SmallUnit'})
+        .exec((err,activeProducts)=>{
             if(err){
                 return res.send({
                     message:err
@@ -99,7 +120,16 @@ module.exports={
     },
 
     getOneById:(req,res)=>{
-        Product.findById(req.body['_id']).exec((err,product)=>{
+        Product.findById(req.body['_id'])
+        .populate({ path: 'Product_Material'})
+        .populate({ path: 'Product_Size_Variants'})
+        .populate({ path: 'Product_Color_Variants'})
+        .populate({ path: 'Product_DefaultImages_Media'})
+        .populate({ path: 'Product_MainUnit'})
+        .populate({ path: 'Product_MiddleUnit'})
+        .populate({ path: 'Product_SmallUnit'})
+        
+        .exec((err,product)=>{
             if(err){
                 return res.send({
                     message:err
