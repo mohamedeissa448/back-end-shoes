@@ -19,7 +19,7 @@ var Hcm_SupplierSchema = mongoose.Schema(
     Supplier_StoreGPSLocation: String,
     Supplier_TimeOfDelivery: Number, //value in hours
     Supplier_Categories: [{
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref:'category'
     }],
     Supplier_Class_Code: {
@@ -28,11 +28,11 @@ var Hcm_SupplierSchema = mongoose.Schema(
     },
     Supplier_Rate: Number,
     Supplier_PaymentMethods: [{
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref:'lut_payment_method'
     }],
     Supplier_WayOfDeliveries: [{
-        type: [mongoose.Schema.Types.ObjectId],
+        type: mongoose.Schema.Types.ObjectId,
         ref:'lut_way_of_delivery'
     }],
     Supplier_Contacts: [
