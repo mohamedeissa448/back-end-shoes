@@ -3,42 +3,43 @@ var Supplier=require("../models/supplier-model");
 module.exports={
     addSupplier:(req,res)=>{
         Supplier.getLastCode(function(err, supplier) {
-            if (supplier) InsertIntoSupplier(supplier.Supplier_Code + 1, user[0]);
-            else InsertIntoSupplier(1, user[0]);
+            if (supplier) InsertIntoSupplier(supplier.Supplier_Code + 1);
+            else InsertIntoSupplier(1);
           });
-          function InsertIntoSupplier(NextCode, user) {
+          function InsertIntoSupplier(NextCode) {
             let newSupplier=new Supplier();
-        newSupplier.Supplier_Name=req.body.Supplier_Name
-        newSupplier.Supplier_Email=req.body.Supplier_Email
-        newSupplier.Supplier_Phone=req.body.Supplier_Phone
-        newSupplier.Supplier_WebsiteURL=req.body.Supplier_WebsiteURL
-        newSupplier.Supplier_FaceBookPageURL=req.body.Supplier_FaceBookPageURL
-        newSupplier.Supplier_Country=req.body.Supplier_Country
-        newSupplier.Supplier_City=req.body.Supplier_City
-        newSupplier.Supplier_Address=req.body.Supplier_Address
-        newSupplier.Supplier_AddressGPSLocation=req.body.Supplier_AddressGPSLocation
-        newSupplier.Supplier_StoreAddress=req.body.Supplier_StoreAddress
-        newSupplier.Supplier_StoreGPSLocation=req.body.Supplier_StoreGPSLocation
-        newSupplier.Supplier_TimeOfDelivery=req.body.Supplier_TimeOfDelivery
-        newSupplier.Supplier_Categories=req.body.Supplier_Categories
-        newSupplier.Supplier_Class_Code=req.body.Supplier_Class_Code
-        newSupplier.Supplier_Rate=req.body.Supplier_Rate
-        newSupplier.Supplier_PaymentMethods=req.body.Supplier_PaymentMethods
-        newSupplier.Supplier_WayOfDeliveries=req.body.Supplier_WayOfDeliveries
-        newSupplier.Supplier_Contacts=req.body.Supplier_Contacts
+            newSupplier.Supplier_Code=NextCode
+            newSupplier.Supplier_Name=req.body.Supplier_Name
+            newSupplier.Supplier_Email=req.body.Supplier_Email
+            newSupplier.Supplier_Phone=req.body.Supplier_Phone
+            newSupplier.Supplier_WebsiteURL=req.body.Supplier_WebsiteURL
+            newSupplier.Supplier_FaceBookPageURL=req.body.Supplier_FaceBookPageURL
+            newSupplier.Supplier_Country=req.body.Supplier_Country
+            newSupplier.Supplier_City=req.body.Supplier_City
+            newSupplier.Supplier_Address=req.body.Supplier_Address
+            newSupplier.Supplier_AddressGPSLocation=req.body.Supplier_AddressGPSLocation
+            newSupplier.Supplier_StoreAddress=req.body.Supplier_StoreAddress
+            newSupplier.Supplier_StoreGPSLocation=req.body.Supplier_StoreGPSLocation
+            newSupplier.Supplier_TimeOfDelivery=req.body.Supplier_TimeOfDelivery
+            newSupplier.Supplier_Categories=req.body.Supplier_Categories
+            newSupplier.Supplier_Class_Code=req.body.Supplier_Class_Code
+            newSupplier.Supplier_Rate=req.body.Supplier_Rate
+            newSupplier.Supplier_PaymentMethods=req.body.Supplier_PaymentMethods
+            newSupplier.Supplier_WayOfDeliveries=req.body.Supplier_WayOfDeliveries
+            newSupplier.Supplier_Contacts=req.body.Supplier_Contacts
 
-        newSupplier.save((err,document)=>{
-            if(err){
-                return res.send({
-                     message:err
-                })
-            }else {
-                return res.send({
-                    message:true
-                })
-            }
-        })   
-    }  
+            newSupplier.save((err,document)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else {
+                    return res.send({
+                        message:true
+                    })
+                }
+            })   
+        }  
         
   },
 
@@ -61,7 +62,7 @@ module.exports={
         updatedSupplier.Supplier_Rate=req.body.Supplier_Rate
         updatedSupplier.Supplier_PaymentMethods=req.body.Supplier_PaymentMethods
         updatedSupplier.Supplier_WayOfDeliveries=req.body.Supplier_WayOfDeliveries
-        updatedSupplier.Supplier_Contacts=req.body.Supplier_Contacts
+       // updatedSupplier.Supplier_Contacts=req.body.Supplier_Contacts
         updatedSupplier.Supplier_IsActive=req.body.Supplier_IsActive
         
             Supplier.findByIdAndUpdate(req.body['_id'],updatedSupplier,{new: true},

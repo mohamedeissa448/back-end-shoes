@@ -12,6 +12,7 @@ const authenticate = require("./authenticate");
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var productsRouter=require('./routes/products-route');
+var suppliersRouter=require('./routes/suppliers-route');
 var sysSetupRouter=require('./routes/sys-setup-route');
 var mediaRouter=require("./routes/media-route");
 
@@ -37,6 +38,7 @@ mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,us
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);
+app.use('/suppliers', suppliersRouter);
 app.use('/sys-setup', sysSetupRouter);
 app.use('/media', mediaRouter);
 
