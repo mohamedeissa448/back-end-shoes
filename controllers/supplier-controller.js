@@ -136,5 +136,24 @@ module.exports={
             }
 
         })
+    },
+    /***********************Supplier Contacts */
+    getSupplierContactsByID:(req,res)=>{
+        Supplier.findById( req.body._id)
+      .select("Supplier_Contacts")
+      .exec(function(err, supplier) {
+        if (err) {
+          return res.send({
+            message: err
+          });
+        } else if (supplier) {
+          res.json({
+            message:true,
+            data:{ supplier:supplier }
+        });
+        } else {
+          res.send("not Supplier");
+        }
+      });
     }
 }
