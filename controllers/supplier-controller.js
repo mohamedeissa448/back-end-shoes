@@ -44,7 +44,7 @@ module.exports={
   },
 
     editSupplier:(req,res)=>{
-        var updatedSupplier={}
+       let updatedSupplier={};
         updatedSupplier.Supplier_Name=req.body.Supplier_Name
         updatedSupplier.Supplier_Email=req.body.Supplier_Email
         updatedSupplier.Supplier_Phone=req.body.Supplier_Phone
@@ -64,8 +64,10 @@ module.exports={
         updatedSupplier.Supplier_WayOfDeliveries=req.body.Supplier_WayOfDeliveries
        // updatedSupplier.Supplier_Contacts=req.body.Supplier_Contacts
         updatedSupplier.Supplier_IsActive=req.body.Supplier_IsActive
-        
-            Supplier.findByIdAndUpdate(req.body['_id'],updatedSupplier,{new: true},
+        var newvalues={
+            $set:updatedSupplier
+        }
+            Supplier.findByIdAndUpdate(req.body['_id'],newvalues,{new: true},
             (err,supplier)=>{
                 if(err){
                     return res.send({
@@ -155,5 +157,27 @@ module.exports={
           res.send("not Supplier");
         }
       });
+    },
+
+    addContactsToSupplierBySupplierId:(req,res)=>{
+        let newValues={
+            $set:{
+            Supplier_Contacts:req.body.Supplier_Contacts
+            }
+        }
+        Supplier.findByIdAndUpdate(req.body._id,newValues,{upsert:true},function(err,supplier){
+            if (err) {
+                return res.send({
+                  message: err
+                });
+              } else if (supplier) {
+                res.json({
+                  message:true,
+                  data:{ supplier:supplier }
+              });
+              } else {
+                res.send("not Supplier");
+              }
+        })
     }
 }

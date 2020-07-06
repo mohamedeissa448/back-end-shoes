@@ -39,8 +39,8 @@ var Hcm_SupplierSchema = mongoose.Schema(
       {
         Supplier_ContactTitle: String,
         Supplier_ContactName: String,
-        Supplier_ContactTelphone: [String],
-        Supplier_ContactEmail: [String]
+        Supplier_ContactTelephone: String,
+        Supplier_ContactEmail: String
       }
     ],
     Supplier_IsActive: {

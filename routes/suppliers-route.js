@@ -25,6 +25,8 @@ router.post('/getOneById',async function(req, res, next) {
 router.post('/getSupplierContactsByID',async function(req, res, next) {
     await(supplierController.getSupplierContactsByID(req, res));
 });
-
+router.post('/addContactsToSupplierBySupplierId',async function(req, res, next) {
+    await(supplierController.addContactsToSupplierBySupplierId(req, res));
+});
 
 module.exports = router;
