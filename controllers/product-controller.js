@@ -4,12 +4,15 @@ module.exports={
     addProduct:(req,res)=>{
         Product.getLastCode(function(err, product) {
             if (product) InsertIntoProduct(product.Product_Code + 1);
-            else InsertIntoProduct(1, user[0]);
+            else InsertIntoProduct(1);
         });
-        function InsertIntoProduct(NextCode, user) {
+        function InsertIntoProduct(NextCode) {
             let newProduct=new Product();
+            newProduct.Product_Code =NextCode
             newProduct.Product_Name=req.body.Product_Name
-            newProduct.Product_Size_Variants=req.body.Product_Size_Variants
+            newProduct.Product_Size_Variants=req.body.Product_Size_Variants;
+            newProduct.Product_Categories=req.body.Product_Categories
+            newProduct.Product_Material=req.body.Product_Material
             newProduct.Product_Color_Variants=req.body.Product_Color_Variants
             newProduct.Product_DefaultImages_Media=req.body.Product_DefaultImages_Media
             newProduct.Product_MainUnit=req.body.Product_MainUnit
@@ -70,14 +73,14 @@ module.exports={
 
     getAll:(req,res)=>{
         Product.find({})
-        .populate({ path: 'Product_Material'})
-        .populate({ path: 'Product_Size_Variants'})
-        .populate({ path: 'Product_Color_Variants'})
-        .populate({ path: 'Product_DefaultImages_Media'})
-        .populate({ path: 'Product_MainUnit'})
-        .populate({ path: 'Product_MiddleUnit'})
-        .populate({ path: 'Product_SmallUnit'})
-
+        .populate({ path: 'Categories'})
+        .populate({ path: 'Material'})
+        .populate({ path: 'Size_Variants'})
+        .populate({ path: 'Color_Variants'})
+        .populate({ path: 'DefaultImages_Media'})
+        .populate({ path: 'MainUnit'})
+        .populate({ path: 'MiddleUnit'})
+        .populate({ path: 'SmallUnit'})
         .exec((err,products)=>{
             if(err){
                 return res.send({
