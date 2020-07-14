@@ -4,5 +4,5 @@ var storagePlacesSchema =new mongoose.Schema({
 
    
 });
-const storage_places=mongoose.model('storage_places',storagePlacesSchema);
+const storage_places=mongoose.model('ogt_storage_places',storagePlacesSchema);
 module.exports=storage_places;

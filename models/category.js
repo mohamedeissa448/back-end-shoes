@@ -12,5 +12,5 @@ var CategorySchema = mongoose.Schema({
 });
 
 
-const size = mongoose.model('category', CategorySchema);
+const size = mongoose.model('ogt_category', CategorySchema);
 module.exports = size;

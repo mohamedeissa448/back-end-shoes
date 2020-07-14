@@ -16,7 +16,7 @@ var Ogt_ProductSchema =new mongoose.Schema({
     Product_Name     		                        : String,
     Product_Categories                              :[{
         type:[mongoose.Schema.Types.ObjectId],
-        ref:'category'
+        ref:'ogt_category'
     }],
     Product_Material                                :{
         type:mongoose.Schema.Types.ObjectId,

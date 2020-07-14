@@ -20,7 +20,7 @@ var Hcm_SupplierSchema = mongoose.Schema(
     Supplier_TimeOfDelivery: Number, //value in hours
     Supplier_Categories: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref:'category'
+        ref:'ogt_category'
     }],
     Supplier_Class_Code: {
         type: mongoose.Schema.Types.ObjectId,
