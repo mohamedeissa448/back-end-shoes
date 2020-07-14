@@ -56,7 +56,55 @@ var Ogt_ProductSchema =new mongoose.Schema({
         default: true
     }
    
+},
+ {
+    toJSON: { virtuals: true }
+  }
+);
+
+Ogt_ProductSchema.virtual("Categories",{
+    ref: "category",
+  localField: "Product_Categories",
+  foreignField: "_id",
+  justOne: false // for many-to-1 relationships
 });
+Ogt_ProductSchema.virtual("Material",{
+    ref: "lut_product_material",
+  localField: "Product_Material",
+  foreignField: "_id",
+  justOne: true // for 1-to-1 relationships
+});
+Ogt_ProductSchema.virtual("Size_Variants",{
+    ref: "lut_size_variants",
+  localField: "Product_Size_Variants",
+  foreignField: "_id",
+  justOne: false // for many-to-1 relationships
+});
+Ogt_ProductSchema.virtual("DefaultImages_Media",{
+    ref: "ogt_media",
+  localField: "Product_DefaultImages_Media",
+  foreignField: "_id",
+  justOne: false // for many-to-1 relationships
+});
+Ogt_ProductSchema.virtual("MainUnit",{
+    ref: "lut_product_unit",
+  localField: "Product_MainUnit",
+  foreignField: "_id",
+  justOne: true // for 1-to-1 relationships
+});
+Ogt_ProductSchema.virtual("MiddleUnit",{
+    ref: "lut_product_unit",
+  localField: "Product_MiddleUnit",
+  foreignField: "_id",
+  justOne: true // for 1-to-1 relationships
+});
+Ogt_ProductSchema.virtual("SmallUnit",{
+    ref: "lut_product_unit",
+  localField: "Product_SmallUnit",
+  foreignField: "_id",
+  justOne: true // for 1-to-1 relationships
+});
+
 const product=mongoose.model('ogt_product',Ogt_ProductSchema);
 module.exports=product;
 

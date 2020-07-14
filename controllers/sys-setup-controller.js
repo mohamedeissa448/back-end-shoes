@@ -620,7 +620,7 @@ module.exports={
     },
 
     getAllPayments:(req,res)=>{
-        Country.find({}).exec((err,payments)=>{
+        Payment.find({}).exec((err,payments)=>{
             if(err){
                 return res.send({
                     message:err

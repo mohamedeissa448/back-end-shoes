@@ -21,5 +21,12 @@ router.get('/getAllActive',async function(req, res, next) {
 router.post('/getOneById',async function(req, res, next) {
     await(supplierController.getOneById(req, res));
 });
+/************************supplier contacts */
+router.post('/getSupplierContactsByID',async function(req, res, next) {
+    await(supplierController.getSupplierContactsByID(req, res));
+});
+router.post('/addContactsToSupplierBySupplierId',async function(req, res, next) {
+    await(supplierController.addContactsToSupplierBySupplierId(req, res));
+});
 
 module.exports = router;
