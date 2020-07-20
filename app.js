@@ -32,6 +32,7 @@ app.use(bodyParser.urlencoded({extended:false}))
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
 //connect to DB
+//mongoose.connect(process.env.OgatDBConnection, { useNewUrlParser: true,useUnifiedTopology:true })
 mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,useUnifiedTopology:true })
 .then(()=>console.log("connected to DB"))
 .catch(()=>console.log("Couldn't connect to DB"))
