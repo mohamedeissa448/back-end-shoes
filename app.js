@@ -19,6 +19,8 @@ var mediaRouter=require("./routes/media-route");
 var categoriesRouter =require("./routes/categories-route");
 var increaseInventoryRouter =require("./routes/increase-inventory-route");
 var decreaseInventoryRouter = require("./routes/decrease-inventory-route");
+var storagePlacesRouter = require("./routes/storage-places-route");
+
 var app = express();
 
 // view engine setup
@@ -49,7 +51,7 @@ app.use('/media', mediaRouter);
 app.use('/categories', categoriesRouter);increaseInventoryRouter
 app.use('/increaseInventory', increaseInventoryRouter);
 app.use('/decreaseInventory', decreaseInventoryRouter);
-
+app.use('/storagePlaces', storagePlacesRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
