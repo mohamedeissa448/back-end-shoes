@@ -20,6 +20,7 @@ var categoriesRouter =require("./routes/categories-route");
 var increaseInventoryRouter =require("./routes/increase-inventory-route");
 var decreaseInventoryRouter = require("./routes/decrease-inventory-route");
 var storagePlacesRouter = require("./routes/storage-places-route");
+var storeRouter = require("./routes/store-route");
 
 var app = express();
 
@@ -52,6 +53,8 @@ app.use('/categories', categoriesRouter);increaseInventoryRouter
 app.use('/increaseInventory', increaseInventoryRouter);
 app.use('/decreaseInventory', decreaseInventoryRouter);
 app.use('/storagePlaces', storagePlacesRouter);
+app.use('/store', storeRouter);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

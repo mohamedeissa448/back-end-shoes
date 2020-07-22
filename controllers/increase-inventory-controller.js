@@ -1,4 +1,5 @@
 var IncreaseInventory = require("../models/increase-inventory-model")
+var Store = require("../models/store-model");
 
 module.exports={
     addIncreaseInventory:(req,res)=>{
@@ -20,9 +21,30 @@ module.exports={
                         message:err
                     })
                 }else {
-                    return res.send({
-                        message:true
-                    })
+                    //we need to add documents to store model
+                    console.log("document",document);
+                    saveAll();
+                    function saveAll(  ){
+                        var count = 0;
+                        document.IncreaseInventory_Products.forEach(function(product){
+                            let newProduct=new Store();
+                            newProduct.Store_Product=product.Product
+                            newProduct.Size_Variant=product.Size_Variant
+                            newProduct.Color_Variant=product.Color_Variant
+                            newProduct.Store_Quantity=product.Quantity
+                            newProduct.Store_Cost=product.Cost
+                            newProduct.Store_StoragePlace = null;
+                            newProduct.save(function(err){
+                                count++;
+                                if( count == document.IncreaseInventory_Products.length ){
+                                    return res.send({
+                                        message:true
+                                    });
+                                }
+                            });
+                        });
+                      }
+                    
                 }
             })
         }    
