@@ -63,7 +63,7 @@ var Ogt_ProductSchema =new mongoose.Schema({
 );
 
 Ogt_ProductSchema.virtual("Categories",{
-    ref: "category",
+    ref: "ogt_category",
   localField: "Product_Categories",
   foreignField: "_id",
   justOne: false // for many-to-1 relationships

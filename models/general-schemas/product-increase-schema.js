@@ -15,5 +15,27 @@ var ProductIncreaseSchema = mongoose.Schema({
     },
     Quantity                        : Number,
     Cost                            : Number      
+  },{
+    toJSON: { virtuals: true }
+  });
+
+
+  ProductIncreaseSchema.virtual("product",{
+    ref: "ogt_product",
+    localField: "Product",
+    foreignField: "_id",
+    justOne: true // for 1-to-1 relationships
+  });
+  ProductIncreaseSchema.virtual("sizeVariant",{
+    ref: "lut_size_variants",
+    localField: "Size_Variant",
+    foreignField: "_id",
+    justOne: true // for 1-to-1 relationships
+  });
+  ProductIncreaseSchema.virtual("colorVariant",{
+    ref: "lut_color_variants",
+    localField: "Color_Variant",
+    foreignField: "_id",
+    justOne: true // for 1-to-1 relationships
   });
   module.exports = ProductIncreaseSchema;

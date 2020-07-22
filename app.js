@@ -6,7 +6,8 @@ var logger = require('morgan');
 var cors=require('cors')
 var bodyParser=require('body-parser')
 var mongoose=require('mongoose');
-const passport = require("passport");
+var passport = require("passport");
+require("./authenticate")(passport);
 const authenticate = require("./authenticate");
 
 var indexRouter = require('./routes/index');
@@ -16,7 +17,8 @@ var suppliersRouter=require('./routes/suppliers-route');
 var sysSetupRouter=require('./routes/sys-setup-route');
 var mediaRouter=require("./routes/media-route");
 var categoriesRouter =require("./routes/categories-route");
-
+var increaseInventoryRouter =require("./routes/increase-inventory-route");
+var decreaseInventoryRouter = require("./routes/decrease-inventory-route");
 var app = express();
 
 // view engine setup
@@ -31,6 +33,7 @@ app.use(bodyParser.urlencoded({extended:false}))
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(passport.initialize());
+app.use(passport.session());
 //connect to DB
 mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,useUnifiedTopology:true })
 .then(()=>console.log("connected to DB"))
@@ -42,7 +45,9 @@ app.use('/products', productsRouter);
 app.use('/suppliers', suppliersRouter);
 app.use('/sys-setup', sysSetupRouter);
 app.use('/media', mediaRouter);
-app.use('/categories', categoriesRouter);
+app.use('/categories', categoriesRouter);increaseInventoryRouter
+app.use('/increaseInventory', increaseInventoryRouter);
+app.use('/decreaseInventory', decreaseInventoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

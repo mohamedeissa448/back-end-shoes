@@ -11,10 +11,7 @@ const userSchema = new mongoose.Schema({
   User_IsActive: {type: Boolean,
     default: true
   },
-  isAdmin: { //sould be deleted and using User_Permissions instead
-    type: Boolean,
-    default: false
-  }
+ 
 });
 
 userSchema.methods.verifyPassword = function(password) {
@@ -27,7 +24,7 @@ userSchema.methods.updatePassword = function(password) {
   this.save();
 };
 
-userSchema.plugin(passportLocalMongoose);// what is this?? //adds username and hashed passport and other methodes on model
+//userSchema.plugin(passportLocalMongoose);// what is this?? //adds username and hashed passport and other methodes on model
 
 User = module.exports = mongoose.model("ogt_users", userSchema);
 
