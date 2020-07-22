@@ -20,7 +20,7 @@ var ProductIncreaseSchema = mongoose.Schema({
   });
 
 
-  ProductIncreaseSchema.virtual("product",{
+  /*ProductIncreaseSchema.virtual("product",{
     ref: "ogt_product",
     localField: "Product",
     foreignField: "_id",
@@ -37,5 +37,5 @@ var ProductIncreaseSchema = mongoose.Schema({
     localField: "Color_Variant",
     foreignField: "_id",
     justOne: true // for 1-to-1 relationships
-  });
+  });*/
   module.exports = ProductIncreaseSchema;

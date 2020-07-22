@@ -71,28 +71,12 @@ getAll:(req,res)=>{
     })
 },
 
-getAllActive:(req,res)=>{
-    IncreaseInventory.find({Category_IsActive:true}).exec((err,activeIncreaseInventories)=>{
-        if(err){
-            return res.send({
-                message:err
-            })
-        }else if(activeIncreaseInventories) {
-            return res.send(activeIncreaseInventories)
-        }else{
-            return res.send({
-                message:"activeIncreaseInventories are null"
-            })
-        }
-
-    })
-},
 
 getOneById:(req,res)=>{
     IncreaseInventory.findById(req.body['_id'])
-    .populate({path:"IncreaseInventory_Products.product", select:"Product_Name"})
-    .populate({path:"IncreaseInventory_Products.sizeVariant", select:"Size_Name"})
-    .populate({path:"IncreaseInventory_Products.colorVariant", select:"Color_Name"})
+    .populate({path:"IncreaseInventory_Products.Product", select:"Product_Name"})
+    .populate({path:"IncreaseInventory_Products.Size_Variant", select:"Size_Name"})
+    .populate({path:"IncreaseInventory_Products.Color_Variant", select:"Color_Name"})
 
     .exec((err,increaseInventory)=>{
         if(err){

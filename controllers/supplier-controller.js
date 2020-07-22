@@ -88,6 +88,7 @@ module.exports={
 
     getAll:(req,res)=>{
         Supplier.find({})
+        .populate({path:"Supplier_Categories",select:"Category_Name"})
         .exec((err,suppliers)=>{
             if(err){
                 return res.send({

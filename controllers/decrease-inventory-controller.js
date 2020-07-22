@@ -76,9 +76,9 @@ getAll:(req,res)=>{
 
 getOneById:(req,res)=>{
     DecreaseInventory.findById(req.body['_id'])
-    .populate({path:"DecreaseInventory_Products.product", select:"Product_Name"})
-    .populate({path:"DecreaseInventory_Products.sizeVariant", select:"Size_Name"})
-    .populate({path:"DecreaseInventory_Products.colorVariant", select:"Color_Name"})
+    .populate({path:"DecreaseInventory_Products.Product", select:"Product_Name"})
+    .populate({path:"DecreaseInventory_Products.Size_Variant", select:"Size_Name"})
+    .populate({path:"DecreaseInventory_Products.Color_Variant", select:"Color_Name"})
 
     .exec((err,decreaseInventory)=>{
         if(err){
