@@ -21,6 +21,7 @@ var increaseInventoryRouter =require("./routes/increase-inventory-route");
 var decreaseInventoryRouter = require("./routes/decrease-inventory-route");
 var storagePlacesRouter = require("./routes/storage-places-route");
 var storeRouter = require("./routes/store-route");
+var productTransactionRouter = require ("./routes/product-transaction-route");
 
 var app = express();
 
@@ -54,6 +55,7 @@ app.use('/increaseInventory', increaseInventoryRouter);
 app.use('/decreaseInventory', decreaseInventoryRouter);
 app.use('/storagePlaces', storagePlacesRouter);
 app.use('/store', storeRouter);
+app.use('/productTransaction', productTransactionRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
