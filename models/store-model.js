@@ -19,7 +19,7 @@ var storeSchema =new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_storage_places'
     },
-
+    Store_PendingQuantity: Number // should be increased based on creating orders. and decreased if order is canceled or shiped.
    
 });
 const store=mongoose.model('ogt_store',storeSchema);

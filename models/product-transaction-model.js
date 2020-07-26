@@ -29,7 +29,11 @@ var ProductTransactionsSchema =new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_decrease_inventory'
     },
-    // Missing Fields for Bill and Sales Orders
+    ProductTransaction_Order                     : { // filled if Order
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'ogt_order'
+    },
+    // Missing Fields for Bill and Return Orders
     ProductTransaction_QuantityBeforAction       : Number, // by small unit
     ProductTransaction_CostBeforAction           : Number, // by small unit
 
