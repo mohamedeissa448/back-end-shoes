@@ -14,6 +14,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var productsRouter=require('./routes/products-route');
 var suppliersRouter=require('./routes/suppliers-route');
+var customersRouter=require('./routes/customers-route');
 var sysSetupRouter=require('./routes/sys-setup-route');
 var mediaRouter=require("./routes/media-route");
 var categoriesRouter =require("./routes/categories-route");
@@ -22,7 +23,8 @@ var decreaseInventoryRouter = require("./routes/decrease-inventory-route");
 var storagePlacesRouter = require("./routes/storage-places-route");
 var storeRouter = require("./routes/store-route");
 var productTransactionRouter = require ("./routes/product-transaction-route");
-
+var shippingCompaniesRouter = require("./routes/shipping-company-routes");
+var affiliateSellersRouter = require("./routes/affiliate-Seller-routes")
 var app = express();
 
 // view engine setup
@@ -48,6 +50,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);
 app.use('/suppliers', suppliersRouter);
+app.use('/customers', customersRouter);
 app.use('/sys-setup', sysSetupRouter);
 app.use('/media', mediaRouter);
 app.use('/categories', categoriesRouter);increaseInventoryRouter
@@ -56,6 +59,8 @@ app.use('/decreaseInventory', decreaseInventoryRouter);
 app.use('/storagePlaces', storagePlacesRouter);
 app.use('/store', storeRouter);
 app.use('/productTransaction', productTransactionRouter);
+app.use('/shippingCompanies', shippingCompaniesRouter);
+app.use('/affiliateSellers', affiliateSellersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -179,4 +179,27 @@ router.post('/deliveries/getOneDeliveryById',async function(req, res, next) {
     await(sysSetupController.getOneDeliveryById(req, res));
 });
 
+/**************   province routes           ********** */
+
+router.post('/provinces/addProvince',async function(req, res, next) {
+    await(sysSetupController.addProvince(req, res));
+});
+
+router.post('/provinces/editProvinceById',async function(req, res, next) {
+    await(sysSetupController.editProvinceById(req, res));
+});
+
+router.get('/provinces/getAllProvinces',async function(req, res, next) {
+    await(sysSetupController.getAllProvinces(req, res));
+});
+
+router.get('/provinces/getAllProvincesActive',async function(req, res, next) {
+    await(sysSetupController.getAllProvincesActive(req, res));
+});
+
+router.post('/provinces/getOneProvinceById',async function(req, res, next) {
+    await(sysSetupController.getOneProvinceById(req, res));
+});
+
+
 module.exports = router;

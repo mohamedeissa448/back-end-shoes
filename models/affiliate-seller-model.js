@@ -60,14 +60,14 @@ var AffiliateSellerSchema = mongoose.Schema(
         ref:'lut_class'
     },
     AffiliateSeller_RevenuePercentage           : Number, // Percentage of each successed order
-    AffiliateSeller_RevenuePercentageChangesLog : { // log the changes of the percentage of the revenue
+    AffiliateSeller_RevenuePercentageChangesLog : [{ // log the changes of the percentage of the revenue
       dateOfChanges         : Date,
       Percentage            : Number,
       ChangedByUser         : {
         type: mongoose.Schema.Types.ObjectId,
         ref:'ogt_users'
       }
-    },
+    }],
     AffiliateSeller_Bank_Name                   : String,
     AffiliateSeller_BankAccountNumber           : String,
     AffiliateSeller_BankAccountHolderName       : String,
@@ -112,7 +112,6 @@ AffiliateSellerSchema.methods.updatePassword = function(password) {
   this.save();
 };
 
-AffiliateSellerSchema.plugin(passportLocalMongoose);// what is this?? //adds username and hashed passport and other methodes on model
 
 
 var AffiliateSeller = (module.exports = mongoose.model("ogt_affiliate_seller",AffiliateSellerSchema));

@@ -16,7 +16,7 @@ var OrderSchema =new mongoose.Schema({
 
     Order_CreatedType                           : String, // AffiliateSeller or DirectCustomer ... For now only AffiliateSeller is used
     
-    Order_Customer                               : { // should be Inserted if customer not in the database 
+    Order_Customer                              : { // should be Inserted if customer not in the database 
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_customer'
     },

@@ -9,20 +9,31 @@ var CustomerSchema = mongoose.Schema({
         type:Date,
         default:    new Date(),
     },
+    Address          : AddressSchema,
     Customer_BillingAddress      : AddressSchema,
     Customer_BillingAddressLog   : [{
-        ChangingDate     : Date,
+        ChangingDate     : {
+           type: Date,
+           default : new Date(),
+        },
         Address          : AddressSchema
     }],
     Customer_ShippingAddress      :AddressSchema,
     Customer_ShippingAddressLog   : [{
-        ChangingDate     : Date,
-        Address          : AddressSchema
+        ChangingDate     : {
+            type: Date,
+            default : new Date(),
+         },
+         Address          : AddressSchema
     }],
     Customer_Status               : Number // 1 = active , 0 = disactive , 2 = blocked
     
 });
 
 
-const size = mongoose.model('ogt_customer', CustomerSchema);
-module.exports = size;
+const customer = mongoose.model('ogt_customer', CustomerSchema);
+module.exports = customer;
+module.exports.getLastCode = function(callback) {
+    customer.findOne({}, callback).sort({ Customer_Code: -1 });
+  };
+  

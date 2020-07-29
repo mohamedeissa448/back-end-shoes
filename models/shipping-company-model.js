@@ -9,7 +9,7 @@ var ShippingContractSchema= mongoose.Schema({
   },
   ContractDate                : Date,
   ContractPriceAndCost        : {
-    Province: { // filled if Decrease Inventory
+    Province: { 
       type:mongoose.Schema.Types.ObjectId,
       ref:'lut_province'
     },
@@ -40,10 +40,10 @@ var ShippingCompanySchema = mongoose.Schema(
     },
     ShippingCompany_Rate                  : Number,
     ShippingCompany_Contacts              : [{
-      ContactTitle: String,
-      ContactName: String,
-      ContactTelephone: String,
-      ContactEmail: String
+      ShippingCompany_ContactTitle: String,
+      ShippingCompany_ContactName: String,
+      ShippingCompany_ContactTelephone: String,
+      ShippingCompany_ContactEmail: String
     }],
     ShippingCompany_IsActive: {
       type: Boolean,

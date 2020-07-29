@@ -6,6 +6,7 @@ var Class=require("../models/lut-class-model");
 var Country=require("../models/lut-country-model");
 var Payment=require("../models/lut-payment-method-model");
 var Delivery=require("../models/lut-way-of-delivery-model");
+var Province=require("../models/lut-province-model");
 
 module.exports={
     /***********Size Variant************* */
@@ -758,6 +759,99 @@ module.exports={
             }else{
                 return res.send({
                     message:"delivery is null"
+                })
+            }
+
+        })
+    },
+    /*********** Provinces ************* */
+    addProvince:(req,res)=>{
+        const newProvince=new Province();
+        newProvince.Province_Name=req.body.Province_Name;
+        newProvince.Province_ShortCode=req.body.Province_ShortCode;
+        newProvince.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editProvinceById:(req,res)=>{
+        var updatedProvince={}
+        updatedProvince.Province_Name=req.body.Province_Name;
+        updatedProvince.Province_ShortCode=req.body.Province_ShortCode;
+        updatedProvince.Province_IsActive=req.body.Province_IsActive;
+
+            Province.findByIdAndUpdate(req.body['_id'],updatedProvince,{new: true},
+            (err,province)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(province) {
+                    return res.send({
+                        message:true,
+                        data:{ newProvince:province }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated province is null"
+                    })
+                }
+            })
+    },
+
+    getAllProvinces:(req,res)=>{
+        Province.find({}).exec((err,provinces)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(provinces) {
+                return res.send(provinces)
+            }else{
+                return res.send({
+                    message:"provinces are null"
+                })
+            }
+
+        })
+    },
+
+    getAllProvincesActive:(req,res)=>{
+        Province.find({Province_IsActive:true}).exec((err,activeProvinces)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activeProvinces) {
+                return res.send(activeProvinces)
+            }else{
+                return res.send({
+                    message:"activeProvinces are null"
+                })
+            }
+
+        })
+    },
+
+    getOneProvinceById:(req,res)=>{
+        Province.findById(req.body['_id']).exec((err,province)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(province) {
+                return res.send(province)
+            }else{
+                return res.send({
+                    message:"province is null"
                 })
             }
 
