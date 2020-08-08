@@ -36,4 +36,45 @@ router.post('/getAffiliateSellerPaymentsByID',async function(req, res, next) {
 router.post('/addPaymentsToAffiliateSellerByAffiliateSellerId',async function(req, res, next) {
     await(affiliateSellerController.addPaymentsToAffiliateSellerByAffiliateSellerId(req, res));
 });
+/********************    log In      */
+router.post("/login",async function(req, res, next) {
+    console.log("req.user", req.user);
+    //this function will be executed only if loging in succeded
+    //it will add a property req.user
+   await affiliateSellerController.login(req, res,next);
+  });
+  router.post("/signUp",async function(req, res, next) {
+    console.log("11")
+   await affiliateSellerController.signUp(req, res);
+  });
+  router.post("/AddUser",async function(req, res) {
+      await affiliateSellerController.addUser(req, res);
+    
+  });
+  
+  router.get("/getAllUsers",async function(req, res) {
+      await(affiliateSellerController.getAllUsers(req, res));
+    
+  });
+  router.get("/getAllUsersNumber",async function(req, res) {
+      await(affiliateSellerController.getAllUsersNumber(req, res));
+  });
+  
+  router.get("/getActiveUsers",async function(req, res) {
+      await(affiliateSellerController.getActiveUsers(req, res));
+    
+  });
+  router.post("/editUserPermissions",async function(req, res) {
+      await(affiliateSellerController.editUserPermissions(req, res));
+  
+  });
+  router.post("/changeMyPassword",async function(req, res) {
+      await(affiliateSellerController.changeMyPassword(req, res));
+  
+  });
+  router.post("/changePassword",async function(req, res) {
+      await(affiliateSellerController.changePassword(req, res));
+    
+  });
+  
 module.exports = router;

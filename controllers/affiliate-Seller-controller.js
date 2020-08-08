@@ -1,4 +1,8 @@
 var AffiliateSeller=require("../models/affiliate-seller-model");
+var passwordHash = require("password-hash");
+const jwt = require("jsonwebtoken");
+const passport = require("passport");
+var passwordHash = require("password-hash");
 
 module.exports={
     addAffiliateSeller:(req,res)=>{
@@ -30,12 +34,18 @@ module.exports={
             newSeller.AffiliateSeller_BankAccountHolderName=req.body.AffiliateSeller_BankAccountHolderName
             newSeller.AffiliateSeller_BankIBANNumber=req.body.AffiliateSeller_BankIBANNumber
             newSeller.AffiliateSeller_CreatedByUser=req.body.AffiliateSeller_CreatedByUser
-
+            //for user
+            newSeller.User_Code = NextCode;
+             newSeller.User_Name = req.body.AffiliateSeller_Name;
+            newSeller.User_Password = passwordHash.generate(req.body.AffiliateSeller_Password);
+            newSeller.User_DisplayName = req.body.AffiliateSeller_Name;
+            newSeller.User_Permissions = [];
             newSeller.save((err,document)=>{
                 if(err){
                     return res.send({
                         message:err
                     })
+                   
                 }else {
                     return res.send({
                         message:true
@@ -69,7 +79,9 @@ module.exports={
         updatedSeller.AffiliateSeller_BankAccountHolderName=req.body.AffiliateSeller_BankAccountHolderName
         updatedSeller.AffiliateSeller_BankIBANNumber=req.body.AffiliateSeller_BankIBANNumber
         updatedSeller.AffiliateSeller_CreatedByUser=req.body.AffiliateSeller_CreatedByUser
-        updatedSeller.AffiliateSeller_IsActive=req.body.AffiliateSeller_IsActive
+        updatedSeller.AffiliateSeller_IsActive=req.body.AffiliateSeller_IsActive;
+        updatedSeller.User_Name = req.body.AffiliateSeller_Name;
+
         var newvalues={
             $set:updatedSeller
         }
@@ -80,6 +92,7 @@ module.exports={
                         message:err
                     })
                 }else if(seller) {
+                    seller.updatePassword(seller.AffiliateSeller_Password)
                     return res.send({
                         message:true,
                         data:{ newSeller:seller }
@@ -229,5 +242,182 @@ module.exports={
                 res.send("not seller");
               }
         })
-    }
+    },
+    /********        Log In              *********** */
+    login: function(req, res, next) {
+        passport.authenticate("affiliateSellerLogin", function(err, user, info) {
+          if (err) {
+            return next(err);
+          }
+          if (!user) {
+            return res.send(info);
+          }
+          req.logIn(user, function(err) {
+            if (err) {
+              return next(info);
+            }
+            else{
+              user.User_Password = '';
+              return res.send(user);
+            }
+            
+          });
+        })(req, res, next);
+      },
+      getAllUsers: function(request, res) {
+        affiliateUser.find({}).exec(function(err, user) {
+          if (err) {
+            return res.send({
+              message: err
+            });
+          } else if (user) {
+            res.send(user);
+          } else {
+            res.send("not Users");
+          }
+        });
+      },
+      getAllUsersNumber:function(req,res){
+        affiliateUser.find({}).count(function(err, count){
+          console.log("Number of docs: ", count );
+          if(err){
+            return res.send({err:err})
+          }else {
+            return res.send({count:count})
+          }
+        });
+      },
+    
+      getActiveUsers: function(request, response) {
+        affiliateUser.find({ User_IsActive: 1 }).exec(function(err, user) {
+          if (err) {
+            return res.send({
+              message: err
+            });
+          } else if (user) {
+            response.send(user);
+          } else {
+            response.send("no Users");
+          }
+        });
+      },
+      addUser: function(request, res) {
+        affiliateUser.getLastCode(function(err, user) {
+          console.log("user",user)
+          if (user) InsertIntoUser(user.User_Code + 1);
+          else InsertIntoUser(1);
+        });
+    
+        function InsertIntoUser(NextCode) {
+          console.log("NextCode",NextCode)
+          var newUser = new affiliateUser();
+          newUser.User_Code = NextCode;
+          newUser.User_Name = request.body.User_Name;
+          newUser.User_Password = passwordHash.generate(request.body.User_Password);
+          newUser.User_DisplayName = request.body.User_DisplayName;
+          newUser.User_Permissions = [];
+          newUser.User_IsActive = 1;
+          console.log("new user",newUser)
+          newUser.save(function(error, doneadd) {
+            if (error) {
+              return res.send({
+                message: error
+              });
+            } else {
+              return res.send({
+                message: true
+              });
+            }
+          });
+        }
+      },
+    
+      editUserPermissions: function(request, res) {
+        var newvalues = {
+          $set: {
+            User_Permissions: request.body.User_Permissions
+          }
+        };
+        var myquery = { User_Code: request.body.User_Code };
+        affiliateUser.findOneAndUpdate(myquery, newvalues, function(err, field) {
+          if (err) {
+            return res.send({
+              message: "Error"
+            });
+          }
+          if (!field) {
+            return res.send({
+              message: "User not exists"
+            });
+          } else {
+            return res.send({
+              message: true
+            });
+          }
+        });
+      },
+      changeMyPassword: function(request, res) {
+        affiliateUser.findOne({ User_Code: request.body.User_Code }, function(err, user) {
+          if (err) {
+            res.send({ message: err });
+          } else if (user) {
+            if (!user.verifyPassword(request.body.old_password)) {
+              res.send({ message: false });
+            } else {
+              user.updatePassword(request.body.new_password);
+              res.send({ message: true });
+            }
+          } else {
+            res.send({ message: "Error" });
+          }
+        });
+      },
+      changePassword: function(request, res) {
+        affiliateUser.findOne({ User_Code: request.body.id }, function(err, user) {
+          if (err) {
+            res.send({ message: err });
+          } else if (user) {
+            user.updatePassword(request.body.password);
+            res.send({ message: true });
+          } else {
+            res.send({ message: "unknown Error" });
+          }
+        });
+      },
+      /*
+      login: (req, res) => {
+        const token = authenticate.getToken({
+          _id: req.user._id,
+          isAdmin: req.user.isAdmin,
+          username: req.user.username
+        });
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.json({ succcess: true, token: token, status: "loging Successful" });
+      },
+      signUp: (req, res, user) => {
+          console.log("req.body",req.body)
+        if (user) {
+          username = user.username;
+        } else {
+          username = req.body.username;
+        }
+        User.register(
+          new User({ username: username }),
+          req.body.password,
+          (err, user) => {
+            if (err) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.json({ err: err });
+            } else {
+              passport.authenticate("local")(req, res, () => {
+                res.statusCode = 200;
+                res.setHeader("Content-Type", "application/json");
+                res.json({ succcess: true, status: "Registration Successful" });
+              });
+            }
+          }
+        );
+      }*/
 }

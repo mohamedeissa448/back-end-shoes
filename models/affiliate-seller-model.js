@@ -96,19 +96,25 @@ var AffiliateSellerSchema = mongoose.Schema(
     AffiliateSeller_IsActive: {
       type: Boolean,
       default: true
-    }
-
+    },
+    //user properties
+    User_Code: Number,
+    User_Name: String,
+    User_Password: String,
+    User_DisplayName: String,
+    User_Permissions: [String],
+    
   }
 );
 
 AffiliateSellerSchema.methods.verifyPassword = function(password) {
-  if (passwordHash.verify(password, this.AffiliateSeller_Password) == 1) 
+  if (passwordHash.verify(password, this.User_Password) == 1) 
       return 1;
   else return 0;
 };
 
 AffiliateSellerSchema.methods.updatePassword = function(password) {
-  this.AffiliateSeller_Password = passwordHash.generate(password);
+  this.User_Password = passwordHash.generate(password);
   this.save();
 };
 

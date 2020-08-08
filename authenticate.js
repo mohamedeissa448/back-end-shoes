@@ -4,7 +4,7 @@ var LocalStrategy    = require('passport-local').Strategy;
 
 
 var User       = require('./models/user-model');
-
+var affiliateSeller = require('./models/affiliate-seller-model')
 module.exports = function(passport) {
 
     // Maintaining persistent login sessions
@@ -27,6 +27,25 @@ module.exports = function(passport) {
     function(req, user_name, password, done) {
        process.nextTick(function() {
             User.findOne({ 'User_Name' :  user_name }, function(err, user) {
+                if (err){ return done(err);}
+                if (!user)
+                  return done(null,false,{status:false,message:'user is not exist'});
+                if (!user.verifyPassword(password))
+                    return done(null,false,{status:false,message:'Enter correct password'});
+               else
+                    return done(null, user);
+            });
+        });
+
+    }));
+    //for affiliate user log in 
+    passport.use('affiliateSellerLogin', new LocalStrategy({
+        usernameField : 'user_name',
+        passReqToCallback : true 
+    },
+    function(req, user_name, password, done) {
+       process.nextTick(function() {
+            affiliateSeller.findOne({ 'User_Name' :  user_name }, function(err, user) {
                 if (err){ return done(err);}
                 if (!user)
                   return done(null,false,{status:false,message:'user is not exist'});
