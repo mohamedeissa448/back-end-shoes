@@ -42,7 +42,8 @@ var OrderSchema =new mongoose.Schema({
     Order_CustomerPaymentStatus                 : String, // COD, Paid
     Order_InvntoryHandlingAssignedTo            : {
         type:mongoose.Schema.Types.ObjectId,
-        ref:'ogt_users'
+        ref:'ogt_users',
+        default : null
     },
     Order_Products                              : [ProductDecreaseSchema],
 

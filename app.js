@@ -24,7 +24,8 @@ var storagePlacesRouter = require("./routes/storage-places-route");
 var storeRouter = require("./routes/store-route");
 var productTransactionRouter = require ("./routes/product-transaction-route");
 var shippingCompaniesRouter = require("./routes/shipping-company-routes");
-var affiliateSellersRouter = require("./routes/affiliate-Seller-routes")
+var affiliateSellersRouter = require("./routes/affiliate-Seller-routes");
+var ordersRouter = require("./routes/order-routes");
 var app = express();
 
 // view engine setup
@@ -61,7 +62,7 @@ app.use('/store', storeRouter);
 app.use('/productTransaction', productTransactionRouter);
 app.use('/shippingCompanies', shippingCompaniesRouter);
 app.use('/affiliateSellers', affiliateSellersRouter);
-
+app.use('/orders', ordersRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

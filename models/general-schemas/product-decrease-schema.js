@@ -21,23 +21,5 @@ var ProductDecreaseSchema = mongoose.Schema({
     toJSON: { virtuals: true }
   });
 
- /* ProductDecreaseSchema.virtual("product",{
-    ref: "ogt_product",
-    localField: "Product",
-    foreignField: "_id",
-    justOne: true // for 1-to-1 relationships
-  });
-  ProductDecreaseSchema.virtual("sizeVariant",{
-    ref: "lut_size_variants",
-    localField: "Size_Variant",
-    foreignField: "_id",
-    justOne: true // for 1-to-1 relationships
-  });
-  ProductDecreaseSchema.virtual("colorVariant",{
-    ref: "lut_color_variants",
-    localField: "Color_Variant",
-    foreignField: "_id",
-    justOne: true // for 1-to-1 relationships
-  });
-*/
+
   module.exports = ProductDecreaseSchema;

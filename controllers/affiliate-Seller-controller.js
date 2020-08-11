@@ -199,7 +199,29 @@ module.exports={
               }
         })
     },
+        /***********************affiliate seller revenue percentages log */
 
+    addAffiliateSeller_RevenuePercentageChangesLogById : function(req,res){
+      let newValues={
+        $push:{
+          AffiliateSeller_RevenuePercentageChangesLog :req.body.affiliateSeller_Percentage_Info
+        }
+    }
+    AffiliateSeller.findByIdAndUpdate(req.body._id,newValues,{upsert:true},function(err,seller){
+        if (err) {
+            return res.send({
+              message: err
+            });
+          } else if (seller) {
+            res.json({
+              message:true,
+              data:{ seller:seller }
+          });
+          } else {
+            res.send("not seller");
+          }
+    })
+    },
     /***********************affiliate seller Payments */
     getAffiliateSellerPaymentsByID:(req,res)=>{
         AffiliateSeller.findById( req.body._id)
@@ -265,7 +287,7 @@ module.exports={
         })(req, res, next);
       },
       getAllUsers: function(request, res) {
-        affiliateUser.find({}).exec(function(err, user) {
+        AffiliateSeller.find({}).exec(function(err, user) {
           if (err) {
             return res.send({
               message: err
@@ -278,7 +300,7 @@ module.exports={
         });
       },
       getAllUsersNumber:function(req,res){
-        affiliateUser.find({}).count(function(err, count){
+        AffiliateSeller.find({}).count(function(err, count){
           console.log("Number of docs: ", count );
           if(err){
             return res.send({err:err})
@@ -289,7 +311,7 @@ module.exports={
       },
     
       getActiveUsers: function(request, response) {
-        affiliateUser.find({ User_IsActive: 1 }).exec(function(err, user) {
+        AffiliateSeller.find({ User_IsActive: 1 }).exec(function(err, user) {
           if (err) {
             return res.send({
               message: err
@@ -302,7 +324,7 @@ module.exports={
         });
       },
       addUser: function(request, res) {
-        affiliateUser.getLastCode(function(err, user) {
+        AffiliateSeller.getLastCode(function(err, user) {
           console.log("user",user)
           if (user) InsertIntoUser(user.User_Code + 1);
           else InsertIntoUser(1);
@@ -310,7 +332,7 @@ module.exports={
     
         function InsertIntoUser(NextCode) {
           console.log("NextCode",NextCode)
-          var newUser = new affiliateUser();
+          var newUser = new AffiliateSeller();
           newUser.User_Code = NextCode;
           newUser.User_Name = request.body.User_Name;
           newUser.User_Password = passwordHash.generate(request.body.User_Password);
@@ -339,7 +361,7 @@ module.exports={
           }
         };
         var myquery = { User_Code: request.body.User_Code };
-        affiliateUser.findOneAndUpdate(myquery, newvalues, function(err, field) {
+        AffiliateSeller.findOneAndUpdate(myquery, newvalues, function(err, field) {
           if (err) {
             return res.send({
               message: "Error"
@@ -357,7 +379,7 @@ module.exports={
         });
       },
       changeMyPassword: function(request, res) {
-        affiliateUser.findOne({ User_Code: request.body.User_Code }, function(err, user) {
+        AffiliateSeller.findOne({ User_Code: request.body.User_Code }, function(err, user) {
           if (err) {
             res.send({ message: err });
           } else if (user) {
@@ -373,7 +395,7 @@ module.exports={
         });
       },
       changePassword: function(request, res) {
-        affiliateUser.findOne({ User_Code: request.body.id }, function(err, user) {
+        AffiliateSeller.findOne({ User_Code: request.body.id }, function(err, user) {
           if (err) {
             res.send({ message: err });
           } else if (user) {

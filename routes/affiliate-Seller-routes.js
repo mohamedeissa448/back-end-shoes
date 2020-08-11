@@ -21,6 +21,11 @@ router.get('/getAllActive',async function(req, res, next) {
 router.post('/getOneById',async function(req, res, next) {
     await(affiliateSellerController.getOneById(req, res));
 });
+/************************AffiliateSeller revenue percentages log */
+router.post('/addAffiliateSeller_RevenuePercentageChangesLogById',async function(req, res, next) {
+    await(affiliateSellerController.addAffiliateSeller_RevenuePercentageChangesLogById(req, res));
+});
+
 /************************AffiliateSeller contacts */
 router.post('/getAffiliateSellerContactsByID',async function(req, res, next) {
     await(affiliateSellerController.getAffiliateSellerContactsByID(req, res));
