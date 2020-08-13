@@ -21,6 +21,11 @@ router.post('/assignOrderTo',async function(req, res, next) {
 router.post('/shipOrder',async function(req, res, next) {
     await(orderController.shipOrder(req, res));
 });
+
+router.post('/changeOrderStatus',async function(req, res, next) {
+    await(orderController.changeOrderStatus(req, res));
+});
+
 router.get('/getAll',async function(req, res, next) {
     await(orderController.getAll(req, res));
 });

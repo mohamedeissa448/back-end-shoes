@@ -250,6 +250,68 @@ module.exports={
         
     },
 
+    changeOrderStatus: (req,res)=>{
+        var updatedValue = {
+            $set: {
+                Order_Status: req.body.Order_Status,
+
+            }
+        }
+        req.body.Order_CustomerPaymentStatus ? updatedValue.$set.Order_CustomerPaymentStatus = req.body.Order_CustomerPaymentStatus : 1;
+
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedDocment){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(updatedDocment) {
+                var count = 0 ;
+                 //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
+                 updatedDocment.Order_Products.forEach((orderProduct)=>{
+                    Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
+                    .exec(function(err,storeDocument){
+                        console.log('storeDocument1',storeDocument)
+                        if(err){
+                            return res.send({
+                                message3:err
+                            })
+                        }else if(storeDocument){
+                            if(req.body.Order_CustomerPaymentStatus && req.body.Order_CustomerPaymentStatus == "Cancelled"){
+                                storeDocument.Store_PendingQuantity -= orderProduct.Quantity ;
+                            }else if(req.body.Order_CustomerPaymentStatus && req.body.Order_CustomerPaymentStatus == "Returned"){
+                                storeDocument.Store_Quantity += orderProduct.Quantity ;
+                            }
+                           
+                            console.log('storeDocument2',storeDocument)
+                             storeDocument.save(function(err,updatedStoreDocument){
+                                if(err){
+                                    return res.send({
+                                        message4:err
+                                    })
+                                }else {
+                                    count ++ ;
+                                    if(count == updatedDocment.Order_Products.length){
+                                        return res.send({message : true})
+                                    }
+                                }
+                            })
+                            
+                       
+                    }
+                    else{
+                        return res.send({message : "couldnot found order product in store"})
+                    }
+                    })
+                });
+            }else{
+                return res.send({
+                    message:"updatedDocment is null"
+                });
+            }
+        })
+        
+    },
+
 
     getAll:(req,res)=>{
         Order.find({})
