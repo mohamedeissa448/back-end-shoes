@@ -6,13 +6,29 @@ router.post('/addAffiliateSellerOrder',async function(req, res, next) {
     await(orderController.addAffiliateSellerOrder(req, res));
 });
 
-router.post('/editAffiliateSellerOrder',async function(req, res, next) {
-    await(orderController.editAffiliateSellerOrder(req, res));
+router.post('/getAffiliateSellerOrderById',async function(req, res, next) {
+    await(orderController.getAffiliateSellerOrderById(req, res));
 });
 
+router.post('/editAffiliateSellerOrderByOrderId',async function(req, res, next) {
+    await(orderController.editAffiliateSellerOrderByOrderId(req, res));
+});
+
+router.post('/assignOrderTo',async function(req, res, next) {
+    await(orderController.assignOrderTo(req, res));
+});
+
+router.post('/shipOrder',async function(req, res, next) {
+    await(orderController.shipOrder(req, res));
+});
 router.get('/getAll',async function(req, res, next) {
     await(orderController.getAll(req, res));
 });
+//get only orders assigned to a specific user
+router.post('/getUserOrders',async function(req, res, next) {
+    await(orderController.getUserOrders(req, res));
+});
+
 // get orders that affiliate seller only created
 router.post('/getOrdersByAffiliateSellerId',async function(req, res, next) {
     await(orderController.getOrdersByAffiliateSellerId(req, res));

@@ -146,5 +146,24 @@ module.exports={
             }
 
         })
-    }
+    },
+
+    getProductSellingPriceById: (req,res)=>{
+        Product.findById(req.body['_id']) 
+        .select('Product_SellingPrice')       
+        .exec((err,product)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(product) {
+                return res.send(product)
+            }else{
+                return res.send({
+                    message:"product not found"
+                })
+            }
+
+        })
+    },
 }

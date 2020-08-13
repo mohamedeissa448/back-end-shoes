@@ -22,4 +22,7 @@ router.post('/getOneById',async function(req, res, next) {
     await(productController.getOneById(req, res));
 });
 
+router.post('/getProductSellingPriceById',async function(req, res, next) {
+    await(productController.getProductSellingPriceById(req, res));
+});
 module.exports = router;

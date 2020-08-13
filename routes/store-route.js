@@ -19,5 +19,8 @@ router.get('/getAllActive',async function(req, res, next) {
 router.post('/getOneById',async function(req, res, next) {
     await(storeController.getOneById(req, res));
 });
+router.post('/getOneProductFromStore',async function(req, res, next) {
+    await(storeController.getOneProductFromStore(req, res));
+});
 
 module.exports = router;

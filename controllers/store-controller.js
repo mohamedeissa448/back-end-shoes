@@ -32,7 +32,7 @@ module.exports={
 
 getAll:(req,res)=>{
     Store.find({})
-    .populate({path:"Store_Product", select:"Product_Name"})
+    .populate({path:"Store_Product", select:"Product_Name Product_Code"})
     .populate({path:"Size_Variant", select:"Size_Name"})
     .populate({path:"Color_Variant", select:"Color_Name"})
     .populate({path:"Store_StoragePlace", select:"StoragePlace_DisplayName"})
@@ -69,6 +69,27 @@ getOneById:(req,res)=>{
         }else{
             return res.send({
                 message:"store is null"
+            })
+        }
+
+    })
+},
+    getOneProductFromStore :(req,res)=>{
+    Store.findOne({ 
+        Store_Product: req.body.Store_Product ,
+        Size_Variant:  req.body.Size_Variant,
+        Color_Variant: req.body.Color_Variant
+    })
+    .exec((err,store)=>{
+        if(err){
+            return res.send({
+                message:err
+            })
+        }else if(store) {
+            return res.send(store)
+        }else{
+            return res.send({
+                message:"store product not found"
             })
         }
 
