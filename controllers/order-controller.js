@@ -196,6 +196,7 @@ module.exports={
                 Order_ShippingWaybill : req.body.Order_ShippingWaybill,
                 Order_ShippingPrice : req.body.Order_ShippingPrice,
                 Order_ShippingCost : req.body.Order_ShippingCost,
+                Order_Status: "Shipped"
             }
 
         }
@@ -205,7 +206,41 @@ module.exports={
                     message:err
                 })
             }else if(updatedDocment) {
-                return res.send({message : true});
+                var count = 0 ;
+                 //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
+                 updatedDocment.Order_Products.forEach((orderProduct)=>{
+                    Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
+                    .exec(function(err,storeDocument){
+                        console.log('storeDocument1',storeDocument)
+                        if(err){
+                            return res.send({
+                                message3:err
+                            })
+                        }else if(storeDocument){
+                            
+                            storeDocument.Store_PendingQuantity -= orderProduct.Quantity ;
+                            storeDocument.Store_Quantity -= orderProduct.Quantity ;
+                            console.log('storeDocument2',storeDocument)
+                             storeDocument.save(function(err,updatedStoreDocument){
+                                if(err){
+                                    return res.send({
+                                        message4:err
+                                    })
+                                }else {
+                                    count ++ ;
+                                    if(count == updatedDocment.Order_Products.length){
+                                        return res.send({message : true})
+                                    }
+                                }
+                            })
+                            
+                       
+                    }
+                    else{
+                        return res.send({message : "couldnot found order product in store"})
+                    }
+                    })
+                });
             }else{
                 return res.send({
                     message:"updatedDocment is null"
