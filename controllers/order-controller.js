@@ -207,7 +207,11 @@ module.exports={
                 })
             }else if(updatedDocment) {
                 var count = 0 ;
-                 //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
+                //incase of req.body.Order_ShippedAlready==true then we don't need to update store Store_PendingQuantity,Store_Quantity because they are already updated
+                if(req.body.Order_ShippedAlready == true){
+                    return res.send({message : true})
+                }else{
+                       //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
                  updatedDocment.Order_Products.forEach((orderProduct)=>{
                     Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
                     .exec(function(err,storeDocument){
@@ -241,6 +245,8 @@ module.exports={
                     }
                     })
                 });
+                }
+              
             }else{
                 return res.send({
                     message:"updatedDocment is null"
