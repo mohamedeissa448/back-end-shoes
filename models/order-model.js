@@ -2,6 +2,35 @@ var mongoose = require('mongoose');
 var ProductDecreaseSchema = require('./general-schemas/product-decrease-schema'); 
 var AddressSchema = require('./general-schemas/address-schema'); 
 
+var CancelationDetailsSchema= mongoose.Schema({
+    Cancelation_Date                          : Date,
+    Cancelation_ReasonOfCancelation           : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'lut_reason_of_calcelation',
+        default : null
+    },
+    Cancelation_HandledBy                : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'ogt_users',
+        default : null
+    },
+})
+var ReturnDetailsSchema= mongoose.Schema({
+    Return_Date                     : Date,
+    Return_ReasonOfReturn           : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'lut_reason_of_return',
+        default : null
+    },
+    Return_ShippingCompanyRefNumber : String,// رقم المرتجع من شركة الشحن
+    Return_Products                 : [ProductDecreaseSchema],
+    Return_HandledBy                : {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'ogt_users',
+        default : null
+    },
+    
+})
 var OrderSchema =new mongoose.Schema({
     
     Order_Code     	                : Number, //auto increment
@@ -48,6 +77,8 @@ var OrderSchema =new mongoose.Schema({
     Order_Products                              : [ProductDecreaseSchema],
 
     Order_Status                                : String, // Created (quantity Is Pending), Shipped (Quantity is released form store), Cancelled (canceled before shiped and quantitiy is removed from pending), Returned (), Collected
+    Order_CancelationDetails                    : CancelationDetailsSchema,
+    Order_Return_Details                        : ReturnDetailsSchema,
 
 });
 
