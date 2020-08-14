@@ -9,6 +9,7 @@ var CancelationDetailsSchema= mongoose.Schema({
         ref:'lut_reason_of_calcelation',
         default : null
     },
+    Cancelation_Note                             : String,
     Cancelation_HandledBy                : {
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_users',
@@ -22,6 +23,7 @@ var ReturnDetailsSchema= mongoose.Schema({
         ref:'lut_reason_of_return',
         default : null
     },
+    Return_Note                     : String,
     Return_ShippingCompanyRefNumber : String,// رقم المرتجع من شركة الشحن
     Return_Products                 : [ProductDecreaseSchema],
     Return_HandledBy                : {
