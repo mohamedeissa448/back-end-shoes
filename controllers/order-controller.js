@@ -381,6 +381,26 @@ module.exports={
         })
     },
 
+    getOrderShippingDetailsById :(req,res)=>{
+        Order.findById(req.body._id)
+        .select('Order_Status Order_ShippingCompany Order_ShippingWaybill')
+        .populate({path:"Order_ShippingCompany"})
+        .exec((err,order)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(order) {
+                return res.send(order)
+            }else{
+                return res.send({
+                    message:"order is null"
+                })
+            }
+
+        })
+    },
+
     getOrdersByAffiliateSellerId :(req,res)=>{
         Order.find({ Order_AffiliateSeller : req.body._id})
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
@@ -391,6 +411,53 @@ module.exports={
                 })
             }else if(orders) {
                 return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+
+    getFilteredOrdersByDateFromTO :(req,res)=>{
+        Order.find({ Order_SysDate : {
+            $gte:  req.body.searchDate.Start_Date,
+            $lte:  req.body.searchDate.End_Date
+        }})
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+
+    getFilteredOrdersByCustomerMobile :(req,res)=>{
+        Order.find()
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Address"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                let ordersToSend = []
+                orders.forEach((orderDocument)=>{
+                    if(orderDocument.Order_Customer.Address.Mobile == req.body.Customer_Mobile){
+                        ordersToSend.push(orderDocument)
+                    }
+                })
+                return res.send(ordersToSend)
             }else{
                 return res.send({
                     message:"orders are null"

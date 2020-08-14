@@ -10,6 +10,18 @@ router.post('/getAffiliateSellerOrderById',async function(req, res, next) {
     await(orderController.getAffiliateSellerOrderById(req, res));
 });
 
+router.post('/getOrderShippingDetailsById',async function(req, res, next) {
+    await(orderController.getOrderShippingDetailsById(req, res));
+});
+
+router.post('/getFilteredOrdersByDateFromTO',async function(req, res, next) {
+    await(orderController.getFilteredOrdersByDateFromTO(req, res));
+});
+
+router.post('/getFilteredOrdersByCustomerMobile',async function(req, res, next) {
+    await(orderController.getFilteredOrdersByCustomerMobile(req, res));
+});
+
 router.post('/editAffiliateSellerOrderByOrderId',async function(req, res, next) {
     await(orderController.editAffiliateSellerOrderByOrderId(req, res));
 });
