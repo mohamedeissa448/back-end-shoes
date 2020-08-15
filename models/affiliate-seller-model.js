@@ -40,11 +40,13 @@ var AffiliateSellerSchema = mongoose.Schema(
     AffiliateSeller_Code                        : Number,
     AffiliateSeller_Type                        : String, // Personal or Company
     AffiliateSeller_Name                        : String,
+    AffiliateSeller_DisplayName                 : String,
     AffiliateSeller_NationalID                  : String, // If Personal
     AffiliateSeller_CommercialRegisterID        : String, // If Company
     AffiliateSeller_TaxID                       : String, // If Company
     AffiliateSeller_Email                       : String,
     AffiliateSeller_Password                    : String,
+    AffiliateSeller_Permissions: {type:[String], default : []},
     AffiliateSeller_Phone                       : String,
     AffiliateSeller_Address                     : String,
     AffiliateSeller_City                        : String,
@@ -98,23 +100,22 @@ var AffiliateSellerSchema = mongoose.Schema(
       default: true
     },
     //user properties
-    User_Code: Number,
-    User_Name: String,
-    User_Password: String,
-    User_DisplayName: String,
-    User_Permissions: [String],
+    //User_Code: Number,
+    //User_Name: String,
+    //User_Password: String,
+    //User_Permissions: [String],
     
   }
 );
 
 AffiliateSellerSchema.methods.verifyPassword = function(password) {
-  if (passwordHash.verify(password, this.User_Password) == 1) 
+  if (passwordHash.verify(password, this.AffiliateSeller_Password) == 1) 
       return 1;
   else return 0;
 };
 
 AffiliateSellerSchema.methods.updatePassword = function(password) {
-  this.User_Password = passwordHash.generate(password);
+  this.AffiliateSeller_Password = passwordHash.generate(password);
   this.save();
 };
 

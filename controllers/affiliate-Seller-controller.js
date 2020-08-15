@@ -15,11 +15,12 @@ module.exports={
             newSeller.AffiliateSeller_Code=NextCode
             newSeller.AffiliateSeller_Type=req.body.AffiliateSeller_Type
             newSeller.AffiliateSeller_Name=req.body.AffiliateSeller_Name
+            newSeller.AffiliateSeller_DisplayName = req.body.AffiliateSeller_DisplayName
             newSeller.AffiliateSeller_NationalID=req.body.AffiliateSeller_NationalID
             newSeller.AffiliateSeller_CommercialRegisterID=req.body.AffiliateSeller_CommercialRegisterID
             newSeller.AffiliateSeller_TaxID=req.body.AffiliateSeller_TaxID
             newSeller.AffiliateSeller_Email=req.body.AffiliateSeller_Email
-            newSeller.AffiliateSeller_Password=req.body.AffiliateSeller_Password
+            newSeller.AffiliateSeller_Password=passwordHash.generate(req.body.AffiliateSeller_Password);
             newSeller.AffiliateSeller_Phone=req.body.AffiliateSeller_Phone
             newSeller.AffiliateSeller_Address=req.body.AffiliateSeller_Address
             newSeller.AffiliateSeller_City=req.body.AffiliateSeller_City
@@ -35,11 +36,11 @@ module.exports={
             newSeller.AffiliateSeller_BankIBANNumber=req.body.AffiliateSeller_BankIBANNumber
             newSeller.AffiliateSeller_CreatedByUser=req.body.AffiliateSeller_CreatedByUser
             //for user
-            newSeller.User_Code = NextCode;
-             newSeller.User_Name = req.body.AffiliateSeller_Name;
-            newSeller.User_Password = passwordHash.generate(req.body.AffiliateSeller_Password);
-            newSeller.User_DisplayName = req.body.AffiliateSeller_Name;
-            newSeller.User_Permissions = [];
+            //newSeller.User_Code = NextCode;
+            //newSeller.User_Name = req.body.AffiliateSeller_Name;
+            //newSeller.User_Password = passwordHash.generate(req.body.AffiliateSeller_Password);
+            //newSeller.User_DisplayName = req.body.AffiliateSeller_Name;
+            //newSeller.User_Permissions = [];
             newSeller.save((err,document)=>{
                 if(err){
                     return res.send({
@@ -267,19 +268,21 @@ module.exports={
     },
     /********        Log In              *********** */
     login: function(req, res, next) {
+      console.log("login start")
         passport.authenticate("affiliateSellerLogin", function(err, user, info) {
           if (err) {
             return next(err);
           }
           if (!user) {
-            return res.send(info);
+            console.log("No such user")
+            return res.send({status: false});
           }
           req.logIn(user, function(err) {
             if (err) {
               return next(info);
             }
             else{
-              user.User_Password = '';
+              user.AffiliateSeller_Password = '';
               return res.send(user);
             }
             

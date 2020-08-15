@@ -40,12 +40,12 @@ module.exports = function(passport) {
     }));
     //for affiliate user log in 
     passport.use('affiliateSellerLogin', new LocalStrategy({
-        usernameField : 'user_name',
+        usernameField : 'AffiliateSeller_Email',
         passReqToCallback : true 
     },
     function(req, user_name, password, done) {
        process.nextTick(function() {
-            affiliateSeller.findOne({ 'User_Name' :  user_name }, function(err, user) {
+            affiliateSeller.findOne({ 'AffiliateSeller_Email' :  user_name }, function(err, user) {
                 if (err){ return done(err);}
                 if (!user)
                   return done(null,false,{status:false,message:'user is not exist'});
