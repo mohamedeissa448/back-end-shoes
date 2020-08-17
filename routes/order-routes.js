@@ -34,8 +34,16 @@ router.post('/shipOrder',async function(req, res, next) {
     await(orderController.shipOrder(req, res));
 });
 
-router.post('/changeOrderStatus',async function(req, res, next) {
-    await(orderController.changeOrderStatus(req, res));
+router.post('/cancelOrder',async function(req, res, next) {
+    await(orderController.cancelOrder(req, res));
+});
+
+router.post('/collectOrder',async function(req, res, next) {
+    await(orderController.collectOrder(req, res));
+});
+
+router.post('/returnOrderProducts',async function(req, res, next) {
+    await(orderController.returnOrderProducts(req, res));
 });
 
 router.get('/getAll',async function(req, res, next) {

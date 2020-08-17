@@ -7,6 +7,8 @@ var Country=require("../models/lut-country-model");
 var Payment=require("../models/lut-payment-method-model");
 var Delivery=require("../models/lut-way-of-delivery-model");
 var Province=require("../models/lut-province-model");
+var ReturnReason=require("../models/lut-reason-of-return-model");
+var CancelReason=require("../models/lut-reason-of-calcelation-model");
 
 module.exports={
     /***********Size Variant************* */
@@ -764,8 +766,9 @@ module.exports={
 
         })
     },
-    /*********** Provinces ************* */
-    addProvince:(req,res)=>{
+    
+     /*********** Provinces ************* */
+     addProvince:(req,res)=>{
         const newProvince=new Province();
         newProvince.Province_Name=req.body.Province_Name;
         newProvince.Province_ShortCode=req.body.Province_ShortCode;
@@ -852,6 +855,194 @@ module.exports={
             }else{
                 return res.send({
                     message:"province is null"
+                })
+            }
+
+        })
+    },
+
+    /*********** Reasons of Returns ************* */
+    addReturnReason:(req,res)=>{
+        const newReason=new ReturnReason();
+        newReason.ReasonOfReturn_Name=req.body.ReasonOfReturn_Name;
+        newReason.ReasonOfReturn_Description=req.body.ReasonOfReturn_Description;
+        newReason.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editReturnReasonById:(req,res)=>{
+        var updatedReason={}
+        updatedReason.ReasonOfReturn_Name=req.body.ReasonOfReturn_Name;
+        updatedReason.ReasonOfReturn_Description=req.body.ReasonOfReturn_Description;
+        updatedReason.ReasonOfReturn_IsActive=req.body.ReasonOfReturn_IsActive;
+
+        ReturnReason.findByIdAndUpdate(req.body['_id'],updatedReason,{new: true},
+            (err,reason)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(reason) {
+                    return res.send({
+                        message:true,
+                        data:{ newReason:reason }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated reason is null"
+                    })
+                }
+            })
+    },
+
+    getAllReturnReasons:(req,res)=>{
+        ReturnReason.find({}).exec((err,reasons)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(reasons) {
+                return res.send(reasons)
+            }else{
+                return res.send({
+                    message:"reasons are null"
+                })
+            }
+
+        })
+    },
+
+    getAllReturnReasonsActive:(req,res)=>{
+        ReturnReason.find({ReasonOfReturn_IsActive:true}).exec((err,activeReasons)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activeReasons) {
+                return res.send(activeReasons)
+            }else{
+                return res.send({
+                    message:"activeReasons are null"
+                })
+            }
+
+        })
+    },
+
+    getOneReturnReasonById:(req,res)=>{
+        ReturnReason.findById(req.body['_id']).exec((err,reason)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(reason) {
+                return res.send(reason)
+            }else{
+                return res.send({
+                    message:"reason is null"
+                })
+            }
+
+        })
+    },
+
+    /*********** Reasons of Cancel order ************* */
+    addCancelReason:(req,res)=>{
+        const newReason=new CancelReason();
+        newReason.ReasonOfCalcelation_Name=req.body.ReasonOfCalcelation_Name;
+        newReason.ReasonOfCalcelation_Description=req.body.ReasonOfCalcelation_Description;
+        newReason.save((err,document)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else {
+                return res.send({
+                    message:true
+                })
+            }
+        })
+    },
+
+    editCancelReasonById:(req,res)=>{
+        var updatedReason={}
+        updatedReason.ReasonOfCalcelation_Name=req.body.ReasonOfCalcelation_Name;
+        updatedReason.ReasonOfCalcelation_Description=req.body.ReasonOfCalcelation_Description;
+        updatedReason.ReasonOfCalcelation_IsActive=req.body.ReasonOfCalcelation_IsActive;
+
+        CancelReason.findByIdAndUpdate(req.body['_id'],updatedReason,{new: true},
+            (err,reason)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(reason) {
+                    return res.send({
+                        message:true,
+                        data:{ newReason:reason }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated reason is null"
+                    })
+                }
+            })
+    },
+
+    getAllCancelReasons:(req,res)=>{
+        CancelReason.find({}).exec((err,reasons)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(reasons) {
+                return res.send(reasons)
+            }else{
+                return res.send({
+                    message:"reasons are null"
+                })
+            }
+
+        })
+    },
+
+    getAllCancelReasonsActive:(req,res)=>{
+        CancelReason.find({ReasonOfCalcelation_IsActive:true}).exec((err,activeReasons)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(activeReasons) {
+                return res.send(activeReasons)
+            }else{
+                return res.send({
+                    message:"activeReasons are null"
+                })
+            }
+
+        })
+    },
+
+    getOneCancelReasonById:(req,res)=>{
+        CancelReason.findById(req.body['_id']).exec((err,reason)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(reason) {
+                return res.send(reason)
+            }else{
+                return res.send({
+                    message:"reason is null"
                 })
             }
 

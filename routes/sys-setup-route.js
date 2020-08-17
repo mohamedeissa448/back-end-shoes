@@ -201,5 +201,48 @@ router.post('/provinces/getOneProvinceById',async function(req, res, next) {
     await(sysSetupController.getOneProvinceById(req, res));
 });
 
+/**************   reason of return orders routes           ********** */
+
+router.post('/return-reasons/addReturnReason',async function(req, res, next) {
+    await(sysSetupController.addReturnReason(req, res));
+});
+
+router.post('/return-reasons/editReturnReasonById',async function(req, res, next) {
+    await(sysSetupController.editReturnReasonById(req, res));
+});
+
+router.get('/return-reasons/getAllReturnReasons',async function(req, res, next) {
+    await(sysSetupController.getAllReturnReasons(req, res));
+});
+
+router.get('/return-reasons/getAllReturnReasonsActive',async function(req, res, next) {
+    await(sysSetupController.getAllReturnReasonsActive(req, res));
+});
+
+router.post('/return-reasons/getOneReturnReasonById',async function(req, res, next) {
+    await(sysSetupController.getOneReturnReasonById(req, res));
+});
+
+/**************   reason of cancel orders routes           ********** */
+
+router.post('/cancel-reasons/addCancelReason',async function(req, res, next) {
+    await(sysSetupController.addCancelReason(req, res));
+});
+
+router.post('/cancel-reasons/editCancelReasonById',async function(req, res, next) {
+    await(sysSetupController.editCancelReasonById(req, res));
+});
+
+router.get('/cancel-reasons/getAllCancelReasons',async function(req, res, next) {
+    await(sysSetupController.getAllCancelReasons(req, res));
+});
+
+router.get('/cancel-reasons/getAllCancelReasonsActive',async function(req, res, next) {
+    await(sysSetupController.getAllCancelReasonsActive(req, res));
+});
+
+router.post('/cancel-reasons/getOneCancelReasonById',async function(req, res, next) {
+    await(sysSetupController.getOneCancelReasonById(req, res));
+});
 
 module.exports = router;
