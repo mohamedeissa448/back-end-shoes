@@ -38,7 +38,20 @@ module.exports={
                             })
                         }else {
                             console.log("3")
-                            var count = 0;
+                            //we need to add this order to  AffiliateSeller_CreatedOrders propery in affiliate seller model
+                            seller.AffiliateSeller_CreatedOrders.push({
+                                Order_TotalAmount: document.Order_TotalProductSellingAmount ,
+                                Order_AffiliateSellerRevenuePercentage: document.Order_AffiliateSellerRevenuePercentage,
+                                Order_AffiliateSellerRevenueAmount: document.Order_AffiliateSellerRevenueAmount,
+                                Order_RefrencedOrder: document._id
+                            });
+                            seller.save(function(err,affiliateSellerUpdatedDocument){
+                                if(err){
+                                    return res.send({
+                                        message55:err
+                                    })
+                                }else {
+                                    var count = 0;
                             //we need to update store Store_PendingQuantity property in store model for each ordered product
                             req.body.Order_Products.forEach((orderProduct)=>{
                                 console.log("orderProduct.length",req.body.Order_Products.length)
@@ -63,7 +76,7 @@ module.exports={
                                                 count ++ ;
                                                 console.log("5")
                                                 if(count == req.body.Order_Products.length){
-                                                    console.log("6")
+                                                    console.log("6")                                                    
                                                     return res.send({message : true})
                                                 }
                                             }
@@ -74,6 +87,10 @@ module.exports={
                                     }
                                 })
                             });
+                                }
+
+                            });
+                            
                         }
                     })   
                 }  
@@ -319,17 +336,39 @@ module.exports={
             }
         };
 
-        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedDocment){
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
             if(err){
                 return res.send({
                     message:err
                 });
-            }else if(updatedDocment) {
-                 return res.send({message : true}) ;    
+            }else if(updatedOrderDocment) {
+                //we need to add this order to AffiliateSeller_DeliveredOrders property of affiliate seller model
+                 let updated ={
+                     $push :{
+                        AffiliateSeller_DeliveredOrders : {
+                            Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
+                            Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                            Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
+                            Order_RefrencedOrder: updatedOrderDocment._id
+                        }
+                     }
+                 };
+                 AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
+                 .exec(function(err,updatedSellerDocument){
+                    if(err){
+                        return res.send({
+                            message:err
+                        });
+                    }else if(updatedSellerDocument) {
+                        return res.send({ message : true });
+                    }
+                    else{
+                        return res.send({  message:"updated seller is null" });
+                    }
+                 })
+                 
             }else{
-                return res.send({
-                    message:"updatedDocment is null"
-                });
+                return res.send({ message:"updatedDocment is null" });
             }
         })
         
@@ -370,7 +409,30 @@ module.exports={
                                 }else {
                                     count ++ ;
                                     if(count == req.body.Order_Return_Details.Return_Products.length){
-                                        return res.send({message : true})
+                                        //we need to add this order to AffiliateSeller_ReturnedOrders property of affiliate seller model
+                                        let updated ={
+                                            $push :{
+                                            AffiliateSeller_ReturnedOrders : {
+                                                Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
+                                                Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                                                Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
+                                                Order_RefrencedOrder: updatedOrderDocment._id
+                                            }
+                                            }
+                                        };
+                                        AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
+                                        .exec(function(err,updatedSellerDocument){
+                                        if(err){
+                                            return res.send({
+                                                message:err
+                                            });
+                                        }else if(updatedSellerDocument) {
+                                            return res.send({ message : true });
+                                        }
+                                        else{
+                                            return res.send({  message:"updated seller is null" });
+                                        }
+                                        })
                                     }
                                 }
                             })
