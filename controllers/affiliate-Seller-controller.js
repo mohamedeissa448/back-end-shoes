@@ -3,7 +3,7 @@ var passwordHash = require("password-hash");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 var passwordHash = require("password-hash");
-
+var Order = require("../models/order-model");
 module.exports={
     addAffiliateSeller:(req,res)=>{
         AffiliateSeller.getLastCode(function(err, seller) {
@@ -235,15 +235,40 @@ module.exports={
             message: err
           });
         } else if (seller) {
-          res.json({
-            message:true,
-            data:{ seller:seller }
-        });
+          res.send(seller);
         } else {
           res.send("not seller");
         }
       });
     },
+
+    getAffiliateSellerPaymentsFromDateTo:(req,res)=>{
+      AffiliateSeller.findById( req.body._id)
+    .select("AffiliateSeller_PaymentLog")
+    .populate({path:"AffiliateSeller_PaymentLog.Payment_PaidMethod",select:"PaymentMethod_Name"})
+    .populate({path:"AffiliateSeller_PaymentLog.Payment_PaidByUser",select:"User_DisplayName"})
+    .exec(function(err, seller) {
+      if (err) {
+        return res.send({
+          message: err
+        });
+      } else if (seller) {
+        let filteredPayments = []
+        seller.AffiliateSeller_PaymentLog.forEach((payment)=>{
+          console.log("payment.Payment_Date",new Date(req.body.searchDate.Start_Date).getTime()-payment.Payment_Date.getTime())
+          console.log("new Date(req.body.searchDate.Start_Date)",new Date(req.body.searchDate.Start_Date).getTime())
+          console.log("req.body.searchDate.End_Date",new Date(req.body.searchDate.End_Date).getTime())
+
+          if((payment.Payment_Date).getTime() >= new Date(req.body.searchDate.Start_Date).getTime()  && payment.Payment_Date <= new Date(req.body.searchDate.End_Date).getTime()){
+            filteredPayments.push(payment)
+          }
+        })
+        res.send(filteredPayments);
+      } else {
+        res.send("not seller");
+      }
+    });
+  },
 
     addPaymentsToAffiliateSellerByAffiliateSellerId:(req,res)=>{
         let newValues={
@@ -266,6 +291,200 @@ module.exports={
               }
         })
     },
+    /********         Orders              */
+    getAffiliateSellerCanceledOrders: (req,res)=>{
+      Order.find( { 
+        Order_AffiliateSeller : req.body.Order_AffiliateSeller,
+        Order_Status : 'Cancelled',
+      })
+      .populate({path:'Order_Customer',select :'Customer_Code Customer_Name'})
+      .populate({path:'Order_CancelationDetails.Cancelation_ReasonOfCancelation'})
+      .exec((err,cancelledOrders)=>{
+          if(err){
+              return res.send({
+                  message1:err
+              })
+          }else if(cancelledOrders) {
+              return res.send(cancelledOrders)
+          }else{
+              return res.send({
+                  message:"cancelledOrders are null"
+              })
+          }
+  
+      })
+      /*console.log("req.body",req.body)
+      AffiliateSeller.findById( req.body._id)
+      .select('AffiliateSeller_CanceledOrders')
+      .populate( { path: 'AffiliateSeller_CanceledOrders.Order_RefrencedOrder' })
+      .exec((err,seller)=>{
+          if(err){
+              return res.send({
+                  message1:err
+              })
+          }else if(seller) {
+              return res.send(seller)
+          }else{
+              return res.send({
+                  message:"seller is null"
+              })
+          }
+
+      })*/
+  },
+
+  getAffiliateSellerCanceledOrdersByDateFromTO: (req,res)=>{
+    Order.find( { 
+      Order_AffiliateSeller : req.body.Order_AffiliateSeller,
+      Order_Status : 'Cancelled',
+      Order_SysDate : {
+        $gte:  req.body.searchDate.Start_Date,
+        $lte:  req.body.searchDate.End_Date
+      }
+    })
+    .populate({path:'Order_Customer',select :'Customer_Code Customer_Name'})
+    .populate({path:'Order_CancelationDetails.Cancelation_ReasonOfCancelation'})
+
+    .exec((err,cancelledOrders)=>{
+        if(err){
+            return res.send({
+                message1:err
+            })
+        }else if(cancelledOrders) {
+            return res.send(cancelledOrders)
+        }else{
+            return res.send({
+                message:"cancelledOrders are null"
+            })
+        }
+
+    })
+},
+
+getFilteredCanceledOrdersByCustomerMobile :(req,res)=>{
+  Order.find({ 
+    Order_AffiliateSeller : req.body.Order_AffiliateSeller,
+    Order_Status : 'Cancelled',
+})
+  .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Address"})
+  .exec((err,orders)=>{
+      if(err){
+          return res.send({
+              message:err
+          })
+      }else if(orders) {
+          let ordersToSend = []
+          orders.forEach((orderDocument)=>{
+              if(orderDocument.Order_Customer.Address.Mobile == req.body.Customer_Mobile){
+                  ordersToSend.push(orderDocument)
+              }
+          })
+          return res.send(ordersToSend)
+      }else{
+          return res.send({
+              message:"orders are null"
+          })
+      }
+
+  })
+},
+
+  getAffiliateSellerReturnedOrders : (req,res)=>{
+    Order.find( { 
+      Order_AffiliateSeller : req.body.Order_AffiliateSeller,
+      Order_Status : 'Returned',
+    })
+    .populate({path:'Order_Customer',select :'Customer_Code Customer_Name'})
+    .populate({path:'Order_Return_Details.Return_ReasonOfReturn'})
+    .exec((err,cancelledOrders)=>{
+        if(err){
+            return res.send({
+                message1:err
+            })
+        }else if(cancelledOrders) {
+            return res.send(cancelledOrders)
+        }else{
+            return res.send({
+                message:"cancelledOrders are null"
+            })
+        }
+
+    })
+    /*AffiliateSeller.findById( req.body._id)
+    .select('AffiliateSeller_ReturnedOrders')
+    .populate( { path: 'AffiliateSeller_ReturnedOrders.Order_RefrencedOrder' })
+    .exec((err,seller)=>{
+        if(err){
+            return res.send({
+                message:err
+            })
+        }else if(seller) {
+            return res.send(seller)
+        }else{
+            return res.send({
+                message:"seller is null"
+            })
+        }
+
+    })*/
+},
+
+  getAffiliateSellerReturnedOrdersByDateFromTO: (req,res)=>{
+    Order.find( { 
+      Order_AffiliateSeller : req.body.Order_AffiliateSeller,
+      Order_Status : 'Returned',
+      Order_SysDate : {
+        $gte:  req.body.searchDate.Start_Date,
+        $lte:  req.body.searchDate.End_Date
+      }
+    })
+    .populate({path:'Order_Customer',select :'Customer_Code Customer_Name'})
+    .populate({path:'Order_Return_Details.Return_ReasonOfReturn'})
+
+    .exec((err,cancelledOrders)=>{
+        if(err){
+            return res.send({
+                message1:err
+            })
+        }else if(cancelledOrders) {
+            return res.send(cancelledOrders)
+        }else{
+            return res.send({
+                message:"cancelledOrders are null"
+            })
+        }
+
+    })
+  },
+
+  getFilteredReturnedOrdersByCustomerMobile :(req,res)=>{
+    Order.find({ 
+      Order_AffiliateSeller : req.body.Order_AffiliateSeller,
+      Order_Status : 'Returned',
+  })
+    .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Address"})
+    .exec((err,orders)=>{
+        if(err){
+            return res.send({
+                message:err
+            })
+        }else if(orders) {
+          console.log("orders",orders)
+            let ordersToSend = []
+            orders.forEach((orderDocument)=>{
+                if(orderDocument.Order_Customer.Address.Mobile == req.body.Customer_Mobile){
+                    ordersToSend.push(orderDocument)
+                }
+            })
+            return res.send(ordersToSend)
+        }else{
+            return res.send({
+                message:"orders are null"
+            })
+        }
+  
+    })
+  },
     /********        Log In              *********** */
     login: function(req, res, next) {
       console.log("login start")
@@ -434,40 +653,6 @@ module.exports={
           }
         });
       },
-      /*
-      login: (req, res) => {
-        const token = authenticate.getToken({
-          _id: req.user._id,
-          isAdmin: req.user.isAdmin,
-          username: req.user.username
-        });
-        res.statusCode = 200;
-        res.setHeader("Content-Type", "application/json");
-        res.json({ succcess: true, token: token, status: "loging Successful" });
-      },
-      signUp: (req, res, user) => {
-          console.log("req.body",req.body)
-        if (user) {
-          username = user.username;
-        } else {
-          username = req.body.username;
-        }
-        User.register(
-          new User({ username: username }),
-          req.body.password,
-          (err, user) => {
-            if (err) {
-              res.statusCode = 500;
-              res.setHeader("Content-Type", "application/json");
-              res.json({ err: err });
-            } else {
-              passport.authenticate("local")(req, res, () => {
-                res.statusCode = 200;
-                res.setHeader("Content-Type", "application/json");
-                res.json({ succcess: true, status: "Registration Successful" });
-              });
-            }
-          }
-        );
-      }*/
+
+   
 }

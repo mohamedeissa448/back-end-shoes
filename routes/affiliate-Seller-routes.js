@@ -38,6 +38,9 @@ router.post('/addContactsToAffiliateSellerByAffiliateSellerId',async function(re
 router.post('/getAffiliateSellerPaymentsByID',async function(req, res, next) {
     await(affiliateSellerController.getAffiliateSellerPaymentsByID(req, res));
 });
+router.post('/getAffiliateSellerPaymentsFromDateTo',async function(req, res, next) {
+    await(affiliateSellerController.getAffiliateSellerPaymentsFromDateTo(req, res));
+});
 router.post('/addPaymentsToAffiliateSellerByAffiliateSellerId',async function(req, res, next) {
     await(affiliateSellerController.addPaymentsToAffiliateSellerByAffiliateSellerId(req, res));
 });
@@ -89,5 +92,25 @@ router.post("/login",async function(req, res, next) {
     await(affiliateSellerController.changeEmail(req, res));
   
 });
-  
+/////////affiliate seller orders ///////
+
+router.post("/getAffiliateSellerCanceledOrders",async function(req, res) {
+    await(affiliateSellerController.getAffiliateSellerCanceledOrders(req, res));
+});
+router.post("/getAffiliateSellerCanceledOrdersByDateFromTO",async function(req, res) {
+    await(affiliateSellerController.getAffiliateSellerCanceledOrdersByDateFromTO(req, res));
+});
+router.post("/getFilteredCanceledOrdersByCustomerMobile",async function(req, res) {
+    await(affiliateSellerController.getFilteredCanceledOrdersByCustomerMobile(req, res));
+});
+router.post("/getAffiliateSellerReturnedOrders",async function(req, res) {
+    await(affiliateSellerController.getAffiliateSellerReturnedOrders(req, res));
+});
+router.post("/getAffiliateSellerReturnedOrdersByDateFromTO",async function(req, res) {
+    await(affiliateSellerController.getAffiliateSellerReturnedOrdersByDateFromTO(req, res));
+});
+router.post("/getFilteredReturnedOrdersByCustomerMobile",async function(req, res) {
+    await(affiliateSellerController.getFilteredReturnedOrdersByCustomerMobile(req, res));
+});
+
 module.exports = router;

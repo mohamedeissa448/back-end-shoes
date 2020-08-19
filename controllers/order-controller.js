@@ -281,15 +281,15 @@ module.exports={
             }
         };
 
-        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedDocment){
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
             if(err){
                 return res.send({
                     message:err
                 })
-            }else if(updatedDocment) {
+            }else if(updatedOrderDocment) {
                 var count = 0 ;
                  //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
-                 updatedDocment.Order_Products.forEach((orderProduct)=>{
+                 updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
                     Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
                     .exec(function(err,storeDocument){
                         console.log('storeDocument1',storeDocument)
@@ -307,8 +307,31 @@ module.exports={
                                     })
                                 }else {
                                     count ++ ;
-                                    if(count == updatedDocment.Order_Products.length){
-                                        return res.send({message : true})
+                                    if(count == updatedOrderDocment.Order_Products.length){
+                                             //we need to add this order to AffiliateSeller_CanceledOrders property of affiliate seller model
+                                             let updated ={
+                                                $push :{
+                                                    AffiliateSeller_CanceledOrders : {
+                                                    Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
+                                                    Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                                                    Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
+                                                    Order_RefrencedOrder: updatedOrderDocment._id
+                                                   }
+                                                }
+                                            };
+                                            AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
+                                            .exec(function(err,updatedSellerDocument){
+                                            if(err){
+                                                return res.send({
+                                                    message:err
+                                                });
+                                            }else if(updatedSellerDocument) {
+                                                return res.send({ message : true });
+                                            }
+                                            else{
+                                                return res.send({  message:"updated seller is null" });
+                                            }
+                                            })
                                     }
                                 }
                             })
@@ -382,12 +405,12 @@ module.exports={
             }
         };
 
-        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedDocment){
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
             if(err){
                 return res.send({
                     message:err
                 })
-            }else if(updatedDocment) {
+            }else if(updatedOrderDocment) {
                 var count = 0 ;
                  //we need to update store Store_Quantity  property in store model for each ordered product
                  req.body.Order_Return_Details.Return_Products.forEach((returnProduct)=>{

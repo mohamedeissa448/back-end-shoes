@@ -31,7 +31,7 @@ var AffiliateSellerOrdersSchema= mongoose.Schema({
   Order_AffiliateSellerRevenueAmount         : Number,
   Order_RefrencedOrder                       : {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'ogt_orders'
+    ref:'ogt_order'
   },
 })
 
@@ -86,6 +86,7 @@ var AffiliateSellerSchema = mongoose.Schema(
     AffiliateSeller_CreatedOrders               : [AffiliateSellerOrdersSchema], // update whenerver the seller create an order 
     AffiliateSeller_DeliveredOrders             : [AffiliateSellerOrdersSchema], // update whenerver an order is Collected to us
     AffiliateSeller_ReturnedOrders              : [AffiliateSellerOrdersSchema], // update whenerver an order is returned
+    AffiliateSeller_CanceledOrders              : [AffiliateSellerOrdersSchema], // update whenerver an order is canceled
 
     AffiliateSeller_CreationSysDate             : { // automatic record the Creation date
       type:Date,
@@ -105,6 +106,8 @@ var AffiliateSellerSchema = mongoose.Schema(
     //User_Password: String,
     //User_Permissions: [String],
     
+  },{
+    toJSON: { virtuals: true }
   }
 );
 
