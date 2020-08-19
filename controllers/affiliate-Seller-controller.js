@@ -382,14 +382,17 @@ module.exports={
         });
       },
       changeMyPassword: function(request, res) {
-        AffiliateSeller.findOne({ User_Code: request.body.User_Code }, function(err, user) {
+        AffiliateSeller.findById( request.body._id , function(err, user) {
+          console.log("body",request.body)
           if (err) {
             res.send({ message: err });
           } else if (user) {
             if (!user.verifyPassword(request.body.old_password)) {
+
               res.send({ message: false });
             } else {
               user.updatePassword(request.body.new_password);
+
               res.send({ message: true });
             }
           } else {
@@ -397,12 +400,34 @@ module.exports={
           }
         });
       },
-      changePassword: function(request, res) {
-        AffiliateSeller.findOne({ User_Code: request.body.id }, function(err, user) {
+  
+      changeDisplayName: function(req, res) {
+        var updated ={
+          $set:{
+            AffiliateSeller_DisplayName :req.body.AffiliateSeller_DisplayName
+          }
+        }
+        AffiliateSeller.findByIdAndUpdate(req.body.id ,updated, function(err, user) {
           if (err) {
             res.send({ message: err });
           } else if (user) {
-            user.updatePassword(request.body.password);
+            res.send({ message: true });
+          } else {
+            res.send({ message: "unknown Error" });
+          }
+        });
+      },
+      
+      changeEmail: function(req, res) {
+        var updated ={
+          $set:{
+            AffiliateSeller_Email :req.body.AffiliateSeller_Email
+          }
+        }
+        AffiliateSeller.findByIdAndUpdate(req.body.id ,updated, function(err, user) {
+          if (err) {
+            res.send({ message: err });
+          } else if (user) {
             res.send({ message: true });
           } else {
             res.send({ message: "unknown Error" });

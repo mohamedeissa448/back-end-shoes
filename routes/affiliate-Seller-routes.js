@@ -81,5 +81,13 @@ router.post("/login",async function(req, res, next) {
       await(affiliateSellerController.changePassword(req, res));
     
   });
+  router.post("/changeDisplayName",async function(req, res) {
+    await(affiliateSellerController.changeDisplayName(req, res));
+ });
+
+ router.post("/changeEmail",async function(req, res) {
+    await(affiliateSellerController.changeEmail(req, res));
+  
+});
   
 module.exports = router;
