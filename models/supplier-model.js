@@ -1,5 +1,29 @@
 var mongoose = require("mongoose");
 // var bcrypt   = require('bcrypt-nodejs');
+var SupplierFinancialTransactionSchema =new mongoose.Schema({
+  
+  SupplierFinancialTransaction_SysDate                   : { // automatic record the insert date
+      type:Date,
+      default:    new Date(),
+  },
+  SupplierFinancialTransaction_Date                      : Date, // As Defined in the action
+  SupplierFinancialTransaction_MathSign                  : Number, // (-1 for Payments or returns) and (1 for Purchasing)
+  SupplierFinancialTransaction_Bill                      : { // filled if Bill
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'ogt_bill'
+  },
+  SupplierFinancialTransaction_BillReturn                : { // filled if Bill return
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'ogt_bill_return'
+  },
+  SupplierFinancialTransaction_Payment                   : { // filled if Payment
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'ogt_supplier_payment'
+  },
+  
+  SupplierFinancialTransaction_Type                      : String, // Bill, Bill return, Payment
+});
+
 var SupplierSchema = mongoose.Schema(
   {
     Supplier_Code: Number,
@@ -46,8 +70,8 @@ var SupplierSchema = mongoose.Schema(
     Supplier_IsActive: {
       type: Boolean,
       default: true
-    }
-
+    },
+    Supplier_FinancialTransaction : [SupplierFinancialTransactionSchema]
   },
   {
     toJSON: { virtuals: true }
