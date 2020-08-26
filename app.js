@@ -14,11 +14,14 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var productsRouter=require('./routes/products-route');
 var suppliersRouter=require('./routes/suppliers-route');
+var suppliersPaymentsRouter=require("./routes/suppliers-payments-route")
 var customersRouter=require('./routes/customers-route');
 var sysSetupRouter=require('./routes/sys-setup-route');
 var mediaRouter=require("./routes/media-route");
 var categoriesRouter =require("./routes/categories-route");
 var increaseInventoryRouter =require("./routes/increase-inventory-route");
+var supplierBillsRouter = require("./routes/supplier-Bills-route")
+var supplierReturnBillsRouter = require("./routes/supplier-return-Bills-route")
 var decreaseInventoryRouter = require("./routes/decrease-inventory-route");
 var storagePlacesRouter = require("./routes/storage-places-route");
 var storeRouter = require("./routes/store-route");
@@ -51,11 +54,14 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/products', productsRouter);
 app.use('/suppliers', suppliersRouter);
+app.use('/suppliersPayments', suppliersPaymentsRouter);
 app.use('/customers', customersRouter);
 app.use('/sys-setup', sysSetupRouter);
 app.use('/media', mediaRouter);
 app.use('/categories', categoriesRouter);increaseInventoryRouter
 app.use('/increaseInventory', increaseInventoryRouter);
+app.use('/supplierBills', supplierBillsRouter);
+app.use('/supplierReturnBills', supplierReturnBillsRouter);
 app.use('/decreaseInventory', decreaseInventoryRouter);
 app.use('/storagePlaces', storagePlacesRouter);
 app.use('/store', storeRouter);

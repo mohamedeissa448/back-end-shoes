@@ -18,9 +18,9 @@ var BillSchema =new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_supplier'
     },
-    Bill_TaxAmount                 : [Number],
-    Bill_TotalAmount               : [Number],//total cost of products (auto calculated on interface)
-    Bill_FinalAmount               : [Number],//total cost of products + tax
+    Bill_TaxAmount                 : Number,
+    Bill_TotalAmount               : Number,//total cost of products (auto calculated on interface)
+    Bill_FinalAmount               : Number,//total cost of products + tax
     Bill_PaymentMethod        : {
         type:mongoose.Schema.Types.ObjectId,
         ref: 'lut_payment_method'

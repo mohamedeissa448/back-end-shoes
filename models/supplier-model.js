@@ -8,6 +8,7 @@ var SupplierFinancialTransactionSchema =new mongoose.Schema({
   },
   SupplierFinancialTransaction_Date                      : Date, // As Defined in the action
   SupplierFinancialTransaction_MathSign                  : Number, // (-1 for Payments or returns) and (1 for Purchasing)
+  SupplierFinancialTransaction_Amount                    : Number ,
   SupplierFinancialTransaction_Bill                      : { // filled if Bill
       type:mongoose.Schema.Types.ObjectId,
       ref:'ogt_bill'
