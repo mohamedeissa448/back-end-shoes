@@ -25,10 +25,10 @@ module.exports={
                         $push : {
                             Supplier_FinancialTransaction : {
                                 SupplierFinancialTransaction_Date : billDocument.BillReturn_Date ,
-                                SupplierFinancialTransaction_MathSign : 1 ,
+                                SupplierFinancialTransaction_MathSign : -1 ,
                                 SupplierFinancialTransaction_Amount  : billDocument.Bill_FinalAmount,
                                 SupplierFinancialTransaction_Bill : billDocument._id,
-                                SupplierFinancialTransaction_Type : "Bill"
+                                SupplierFinancialTransaction_Type : "Return Bill"
                             }
                         }
                     };
