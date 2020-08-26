@@ -69,11 +69,21 @@ router.post('/getOneById',async function(req, res, next) {
 /********** for  Statistics    */
 router.post('/getCountOfCanceledOrdersByAffiliateSellerId',async function(req, res, next) {
     await(orderController.getCountOfCanceledOrdersByAffiliateSellerId(req, res));
-})
+});
+
 router.post('/getCountOfReturnedOrdersByAffiliateSellerId',async function(req, res, next) {
     await(orderController.getCountOfReturnedOrdersByAffiliateSellerId(req, res));
-})
+});
+
 router.post('/getCountOfCollectedOrdersByAffiliateSellerId',async function(req, res, next) {
     await(orderController.getCountOfCollectedOrdersByAffiliateSellerId(req, res));
-})
+});
+
+router.post('/getCountOfShippedOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(orderController.getCountOfShippedOrdersByAffiliateSellerId(req, res));
+});
+
+router.post('/getCountOfAllOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(orderController.getCountOfAllOrdersByAffiliateSellerId(req, res));
+});
 module.exports = router;

@@ -60,6 +60,7 @@ module.exports={
                                      console.log("xx",xx)
                                     count++;
                                     if( count == document.IncreaseInventory_Products.length ){
+                                        let innerCount = 0;
                                         document.IncreaseInventory_Products.forEach(function(prod){
                                             if(!storeProduct){
                                                   //we need to add documents to store model
@@ -71,8 +72,8 @@ module.exports={
                                             newProduct.Store_Cost=prod.Cost
                                             newProduct.Store_StoragePlace = null;
                                             newProduct.save(function(err){
-                                                count++;
-                                                if( count == document.IncreaseInventory_Products.length ){
+                                                innerCount++;
+                                                if( innerCount == document.IncreaseInventory_Products.length ){
                                                     return res.send({
                                                         message:true
                                                     });
@@ -82,8 +83,8 @@ module.exports={
                                                 storeProduct.Store_Quantity=newProductTransaction.ProductTransaction_QuantityAfterAction
                                                 storeProduct.Store_Cost=newProductTransaction.ProductTransaction_CostAfterAction;
                                                 storeProduct.save(function(err){
-                                                    count++;
-                                                    if( count == document.IncreaseInventory_Products.length ){
+                                                    innerCount++;
+                                                    if( innerCount == document.IncreaseInventory_Products.length ){
                                                         return res.send({
                                                             message:true
                                                         });

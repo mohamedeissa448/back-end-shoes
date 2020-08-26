@@ -818,4 +818,38 @@ module.exports={
             }
         });   
     },
+
+    getCountOfShippedOrdersByAffiliateSellerId  : (req,res)=>{
+        Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Shipped'})
+        .countDocuments(function(err, count){
+            if(err){
+                return res.json({
+                    message:err
+                })
+            }else if(count) {
+                return res.json({ count:count ,message : true })
+            }else{
+                return res.json({
+                    message:"count is null"
+                })
+            }
+        });   
+    },
+
+    getCountOfAllOrdersByAffiliateSellerId  : (req,res)=>{
+        Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller})
+        .countDocuments(function(err, count){
+            if(err){
+                return res.json({
+                    message:err
+                })
+            }else if(count) {
+                return res.json({ count:count ,message : true })
+            }else{
+                return res.json({
+                    message:"count is null"
+                })
+            }
+        });   
+    },
 }
