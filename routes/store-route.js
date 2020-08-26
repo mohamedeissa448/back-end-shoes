@@ -13,11 +13,20 @@ router.post('/editStoreById',async function(req, res, next) {
 router.get('/getAll',async function(req, res, next) {
     await(storeController.getAll(req, res));
 });
+router.get('/getUnHousedProducts',async function(req, res, next) {
+    await(storeController.getUnHousedProducts(req, res));
+});
+router.get('/getHousedProducts',async function(req, res, next) {
+    await(storeController.getHousedProducts(req, res));
+});
 router.get('/getAllActive',async function(req, res, next) {
     await(storeController.getAllActive(req, res));
 });
 router.post('/getOneById',async function(req, res, next) {
     await(storeController.getOneById(req, res));
+});
+router.post('/housingProduct',async function(req, res, next) {
+    await(storeController.housingProduct(req, res));
 });
 router.post('/getOneProductFromStore',async function(req, res, next) {
     await(storeController.getOneProductFromStore(req, res));

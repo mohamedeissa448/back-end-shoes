@@ -8,7 +8,8 @@ module.exports={
         });
         function InsertIntoProduct(NextCode) {
             let newProduct=new Product();
-            newProduct.Product_Code =NextCode
+            newProduct.Product_Code =NextCode;
+            newProduct.Product_Identifier = req.body.Product_Identifier;
             newProduct.Product_Name=req.body.Product_Name
             newProduct.Product_Size_Variants=req.body.Product_Size_Variants;
             newProduct.Product_Categories=req.body.Product_Categories
@@ -39,7 +40,8 @@ module.exports={
 
     editProduct:(req,res)=>{
         var updatedProduct={}
-        updatedProduct.Product_Name=req.body.Product_Name
+        updatedProduct.Product_Name=req.body.Product_Name;
+        updatedProduct.Product_Identifier = req.body.Product_Identifier;
         updatedProduct.Product_Size_Variants=req.body.Product_Size_Variants
         updatedProduct.Product_Color_Variants=req.body.Product_Color_Variants
         updatedProduct.Product_DefaultImages_Media=req.body.Product_DefaultImages_Media

@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var colorVariantsSchema = mongoose.Schema({
     
     Color_Name     	              : String,
+    Color_ThreeLettersIdentifier  : String,
     Color_HexaDecimalBasedValue   : String,
     Color_Description             : String,
     Color_IsActive                : {

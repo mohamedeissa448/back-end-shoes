@@ -51,7 +51,69 @@ getAll:(req,res)=>{
 
     })
 },
+getUnHousedProducts:(req,res)=>{
+    Store.find({Store_StoragePlace: null})
+    .populate({path:"Store_Product", select:"Product_Name Product_Code Product_Identifier"})
+    .populate({path:"Size_Variant", select:"Size_Name"})
+    .populate({path:"Color_Variant", select:"Color_Name"})
+    .populate({path:"Store_StoragePlace", select:"StoragePlace_DisplayName"})
+    .exec((err,stores)=>{
+        if(err){
+            return res.send({
+                message:err
+            })
+        }else if(stores) {
+            return res.send(stores)
+        }else{
+            return res.send({
+                message:"stores are null"
+            })
+        }
 
+    })
+},
+getHousedProducts:(req,res)=>{
+    Store.find({Store_StoragePlace: { $ne: null }})
+    .populate({path:"Store_Product", select:"Product_Name Product_Code Product_Identifier"})
+    .populate({path:"Size_Variant", select:"Size_Name Size_TwoLettersIdentifier"})
+    .populate({path:"Color_Variant", select:"Color_Name Color_ThreeLettersIdentifier"})
+    .populate({path:"Store_StoragePlace", select:"StoragePlace_DisplayName"})
+    .exec((err,stores)=>{
+        if(err){
+            return res.send({
+                message:err
+            })
+        }else if(stores) {
+            return res.send(stores)
+        }else{
+            return res.send({
+                message:"stores are null"
+            })
+        }
+
+    })
+},
+housingProduct:(req,res)=>{
+    var updatedStore={};
+    updatedStore.Store_StoragePlace = req.body.Store_StoragePlace;
+    Store.findByIdAndUpdate(req.body['_id'],updatedStore,{new: true},(err,store)=>{
+        if(err){
+            return res.send({
+                message:false, 
+                error:err
+            })
+        }else if(store) {
+            return res.send({
+                message:true
+            })
+        }else{
+            return res.send({
+                message:false, 
+                error:"updated store is null"
+            })
+        }
+    })
+},
 
 getOneById:(req,res)=>{
     Store.findById(req.body['_id'])

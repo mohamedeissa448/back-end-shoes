@@ -15,6 +15,7 @@ module.exports={
     addSize:(req,res)=>{
         const newSize=new Size();
         newSize.Size_Name=req.body.Size_Name;
+        newSize.Size_TwoLettersIdentifier=req.body.Size_TwoLettersIdentifier;
         newSize.Size_Description=req.body.Size_Description;
         newSize.save((err,document)=>{
             if(err){
@@ -32,6 +33,7 @@ module.exports={
     editSizeById:(req,res)=>{
         var updatedSize={}
         updatedSize.Size_Name=req.body.Size_Name;
+        updatedSize.Size_TwoLettersIdentifier=req.body.Size_TwoLettersIdentifier;
         updatedSize.Size_Description=req.body.Size_Description;
         updatedSize.Size_IsActive=req.body.Size_IsActive;
 
@@ -201,6 +203,7 @@ module.exports={
     addColor:(req,res)=>{
         const newColor=new Color();
         newColor.Color_Name=req.body.Color_Name;
+        newColor.Color_ThreeLettersIdentifier=req.body.Color_ThreeLettersIdentifier;
         newColor.Color_HexaDecimalBasedValue=req.body.Color_HexaDecimalBasedValue;//might needs modification in future 
         newColor.Color_Description=req.body.Color_Description;
         newColor.Color_IsActive=req.body.Color_IsActive;
@@ -222,6 +225,7 @@ module.exports={
         
             var updatedColor={}
             updatedColor.Color_Name=req.body.Color_Name;
+            updatedColor.Color_ThreeLettersIdentifier=req.body.Color_ThreeLettersIdentifier;
             updatedColor.Color_HexaDecimalBasedValue=req.body.Color_HexaDecimalBasedValue;
             updatedColor.Color_Description=req.body.Color_Description;
             updatedColor.Color_IsActive=req.body.Color_IsActive
