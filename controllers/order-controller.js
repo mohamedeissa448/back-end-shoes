@@ -766,5 +766,56 @@ module.exports={
                     res.send("not customer");
                   }
             })
-        }
+        },
+    
+        /**********     for Statistics      ******** */
+    getCountOfCanceledOrdersByAffiliateSellerId  : (req,res)=>{
+        Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Cancelled'})
+        .countDocuments(function(err, count){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(count) {
+                return res.send({ count:count ,message : true })
+            }else{
+                return res.send({
+                    message:"count is null"
+                })
+            }
+        });   
+    },  
+
+    getCountOfReturnedOrdersByAffiliateSellerId  : (req,res)=>{
+        Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Returned'})
+        .countDocuments(function(err, count){
+            if(err){
+                return res.json({
+                    message:err
+                })
+            }else if(count) {
+                return res.json({ count:count ,message : true })
+            }else{
+                return res.json({
+                    message:"count is null"
+                })
+            }
+        });   
+    },
+    getCountOfCollectedOrdersByAffiliateSellerId  : (req,res)=>{
+        Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Collected'})
+        .countDocuments(function(err, count){
+            if(err){
+                return res.json({
+                    message:err
+                })
+            }else if(count) {
+                return res.json({ count:count ,message : true })
+            }else{
+                return res.json({
+                    message:"count is null"
+                })
+            }
+        });   
+    },
 }
