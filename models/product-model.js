@@ -14,6 +14,7 @@ var Ogt_ProductColor_VariantsSchema = mongoose.Schema({
 var Ogt_ProductSchema =new mongoose.Schema({
     Product_Code     		                        : Number,
     Product_Name     		                        : String,
+    Product_Identifier                          : String,//entered by user
     Product_Categories                              :[{
         type:[mongoose.Schema.Types.ObjectId],
         ref:'ogt_category'

@@ -1,111 +1,109 @@
 var IncreaseInventory = require("../models/increase-inventory-model")
 var Store = require("../models/store-model");
 var ProductTransaction = require("../models/product-transaction-model");
-var Ogt_Product = require("../models/product-transaction-model")
+var Ogt_Product = require("../models/product-model")
 module.exports={
     addIncreaseInventory:(req,res)=>{
-        IncreaseInventory.getLastCode(function(err, increaseInventory) {
-            if (increaseInventory) InsertIntoIncreaseInventory(increaseInventory.IncreaseInventory_Code + 1);
-            else InsertIntoIncreaseInventory(1);
-          });
-        function InsertIntoIncreaseInventory(NextCode) {
-            const newIncreaseInventory=new IncreaseInventory();
-            newIncreaseInventory.IncreaseInventory_Code = NextCode;
-            newIncreaseInventory.IncreaseInventory_Date = req.body.IncreaseInventory_Date;
-            newIncreaseInventory.IncreaseInventory_Note = req.body.IncreaseInventory_Note;
-            newIncreaseInventory.IncreaseInventory_DoneBy_User = req.body.IncreaseInventory_DoneBy_User;
-            newIncreaseInventory.IncreaseInventory_Products = req.body.IncreaseInventory_Products;
+        const UpdateTransactionAndStore = async function() {
+            var NextCode = await GetNexCode();
+            var IncreaseInventoryProducts = await  InsertIntoIncreaseInventory(NextCode);
+            var isInserted = await saveAll(IncreaseInventoryProducts);
+            returnMessage();
+            
+            function GetNexCode(){
+                return new Promise((resolve, reject) => {
+                    IncreaseInventory.getLastCode(function(err, IncreaseInventoryItem) {
+                        if (IncreaseInventoryItem){ 
+                            resolve(IncreaseInventoryItem.IncreaseInventory_Code + 1 );
+                        }
+                        else {resolve(1)};
+                    });
+                })
+            }
 
-            newIncreaseInventory.save((err,document)=>{
-                if(err){
-                    return res.send({
-                        message:err
+            function InsertIntoIncreaseInventory(NextCode) {
+                return new Promise((resolve, reject) => {
+                    const newIncreaseInventory= new IncreaseInventory();
+                    newIncreaseInventory.IncreaseInventory_Code = NextCode;
+                    newIncreaseInventory.IncreaseInventory_Date = req.body.IncreaseInventory_Date;
+                    newIncreaseInventory.IncreaseInventory_Note = req.body.IncreaseInventory_Note;
+                    newIncreaseInventory.IncreaseInventory_DoneBy_User = req.body.IncreaseInventory_DoneBy_User;
+                    newIncreaseInventory.IncreaseInventory_Products = req.body.IncreaseInventory_Products;
+        
+                    newIncreaseInventory.save((err,document)=>{
+                        if(err){
+                            return res.send({
+                                message:err
+                            })
+                        }else { 
+                            resolve(document)
+                        }
                     })
-                }else {
-                    console.log("document",document);  
-                      
-                    saveAll();
-                    function saveAll(  ){
-                        var count = 0;
-                        document.IncreaseInventory_Products.forEach(function(increaseInventoryProduct){
-                            Ogt_Product.find({Product_Code: increaseInventoryProduct.Product})
-                            .exec(function(err,ogt_product){
-                                Store.findOne({Store_Product : increaseInventoryProduct.Product})
+                })
+            }
+            
+            function saveAll(document){
+                return new Promise((resolve, reject) => {
+                    document.IncreaseInventory_Products.forEach(function(increaseInventoryProduct, index){
+                        Ogt_Product.find({_id: increaseInventoryProduct.Product})
+                        .exec(function(err,ogt_product){
+                            Store.findOne({Store_Product : increaseInventoryProduct.Product, Size_Variant: increaseInventoryProduct.Size_Variant, Color_Variant:increaseInventoryProduct.Color_Variant })
                             .exec(function(err,storeProduct){
                                 //we need to add documents to product transaction model 
-                                 const newProductTransaction=new ProductTransaction();
-                                 newProductTransaction.ProductTransaction_Date = document.IncreaseInventory_Date;
-                                 newProductTransaction.ProductTransaction_Product = increaseInventoryProduct.Product;
-                                 newProductTransaction.ProductTransaction_Size_Variant = increaseInventoryProduct.Size_Variant;
-                                 newProductTransaction.ProductTransaction_Color_Variant =increaseInventoryProduct.Color_Variant;
-                                 newProductTransaction.ProductTransaction_MathSign = 1;
-                                 newProductTransaction.ProductTransaction_Type = "Increase Inventory";
-                                 newProductTransaction.ProductTransaction_IncreaseInventory = document._id;
-                                 if(storeProduct){
+                                const newProductTransaction=new ProductTransaction();
+                                newProductTransaction.ProductTransaction_Date = document.IncreaseInventory_Date;
+                                newProductTransaction.ProductTransaction_Product = increaseInventoryProduct.Product;
+                                newProductTransaction.ProductTransaction_Size_Variant = increaseInventoryProduct.Size_Variant;
+                                newProductTransaction.ProductTransaction_Color_Variant =increaseInventoryProduct.Color_Variant;
+                                newProductTransaction.ProductTransaction_MathSign = 1;
+                                newProductTransaction.ProductTransaction_Type = "Increase Inventory";
+                                newProductTransaction.ProductTransaction_IncreaseInventory = document._id;
+                                if(storeProduct){
                                     newProductTransaction.ProductTransaction_QuantityBeforAction = storeProduct.Store_Quantity;
                                     newProductTransaction.ProductTransaction_CostBeforAction = storeProduct.Store_Cost;
                                     newProductTransaction.ProductTransaction_SellPriceOnAction = ogt_product.Product_SellingPrice;
                                     newProductTransaction.ProductTransaction_QuantityAfterAction = storeProduct.Store_Quantity + increaseInventoryProduct.Quantity;
                                     newProductTransaction.ProductTransaction_CostAfterAction = 11111;//needs modification
+                                    newProductTransaction.save(function(err,xx){});
+                                    storeProduct.Store_Quantity=newProductTransaction.ProductTransaction_QuantityAfterAction;
+                                    storeProduct.Store_Cost=newProductTransaction.ProductTransaction_CostAfterAction;
+                                    storeProduct.save(function(err){});
 
-                                 }else{
+                                }else{
                                     newProductTransaction.ProductTransaction_QuantityBeforAction = 0;
                                     newProductTransaction.ProductTransaction_CostBeforAction = 0;
                                     newProductTransaction.ProductTransaction_SellPriceOnAction = ogt_product.Product_SellingPrice;
                                     newProductTransaction.ProductTransaction_QuantityAfterAction =  increaseInventoryProduct.Quantity;
-                                    newProductTransaction.ProductTransaction_CostAfterAction = 11111;//needs modification
+                                    newProductTransaction.ProductTransaction_CostAfterAction = increaseInventoryProduct.Cost;//needs modification
+                                    newProductTransaction.save(function(){})
 
-                                 }
-                                 newProductTransaction.save(function(err,xx){
-                                     console.log("xx",xx)
-                                    count++;
-                                    if( count == document.IncreaseInventory_Products.length ){
-                                        let innerCount = 0;
-                                        document.IncreaseInventory_Products.forEach(function(prod){
-                                            if(!storeProduct){
-                                                  //we need to add documents to store model
-                                            let newProduct=new Store();
-                                            newProduct.Store_Product=prod.Product
-                                            newProduct.Size_Variant=prod.Size_Variant
-                                            newProduct.Color_Variant=prod.Color_Variant
-                                            newProduct.Store_Quantity=prod.Quantity
-                                            newProduct.Store_Cost=prod.Cost
-                                            newProduct.Store_StoragePlace = null;
-                                            newProduct.save(function(err){
-                                                innerCount++;
-                                                if( innerCount == document.IncreaseInventory_Products.length ){
-                                                    return res.send({
-                                                        message:true
-                                                    });
-                                                }
-                                            });
-                                            }else{
-                                                storeProduct.Store_Quantity=newProductTransaction.ProductTransaction_QuantityAfterAction
-                                                storeProduct.Store_Cost=newProductTransaction.ProductTransaction_CostAfterAction;
-                                                storeProduct.save(function(err){
-                                                    innerCount++;
-                                                    if( innerCount == document.IncreaseInventory_Products.length ){
-                                                        return res.send({
-                                                            message:true
-                                                        });
-                                                    }
-                                                })
-                                            }
-                                          
-                                        })
-                                    }
-                             })
-                                })
+                                    let newStoreProduct = new Store();
+                                    newStoreProduct.Store_Product=increaseInventoryProduct.Product
+                                    newStoreProduct.Size_Variant=increaseInventoryProduct.Size_Variant
+                                    newStoreProduct.Color_Variant=increaseInventoryProduct.Color_Variant
+                                    newStoreProduct.Store_Quantity=increaseInventoryProduct.Quantity
+                                    newStoreProduct.Store_Cost=increaseInventoryProduct.Cost
+                                    newStoreProduct.Store_StoragePlace = null;
+                                    newStoreProduct.save(function(err){});
+                                }
                             })
-                            
-                            
-                            
-                        });
-                      }
+                        })
+                        if(index == document.IncreaseInventory_Products.lenth -1){
+                            resolve(true);
+                        }
+                    })
                     
-                }
-            })
-        }    
+                })
+            }
+            function returnMessage(){
+                return res.send({
+                    message:true
+                });
+            }
+        }
+        UpdateTransactionAndStore();
+
+           
 },
 
 editIncreaseInventoryById:(req,res)=>{
