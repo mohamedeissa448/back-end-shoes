@@ -559,6 +559,7 @@ module.exports={
     },
 
     getOrdersByAffiliateSellerId :(req,res)=>{
+        console.log(req.body._id);
         Order.find({ Order_AffiliateSeller : req.body._id})
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
         .exec((err,orders)=>{
@@ -567,6 +568,7 @@ module.exports={
                     message:err
                 })
             }else if(orders) {
+                console.log(orders)
                 return res.send(orders)
             }else{
                 return res.send({

@@ -32,4 +32,7 @@ router.post('/getOneProductFromStore',async function(req, res, next) {
     await(storeController.getOneProductFromStore(req, res));
 });
 
+router.post('/getAvilabelQuantity',async function(req, res, next) {
+    await(storeController.getAvilabelQuantity(req, res));
+});
 module.exports = router;

@@ -12,15 +12,18 @@ module.exports={
             newCustomer.Customer_Name=req.body.Customer_Name
             newCustomer.Address=req.body.Address
             newCustomer.Customer_Status=req.body.Customer_Status
-
+            newCustomer.Customer_BillingAddress=req.body.Customer_BillingAddress
+            newCustomer.Customer_ShippingAddress=req.body.Customer_ShippingAddress
             newCustomer.save((err,document)=>{
                 if(err){
                     return res.send({
+                        status:false,
                         message:err
                     })
                 }else {
                     return res.send({
-                        message:true
+                        status:true,
+                        CustomerID:document._id
                     })
                 }
             })   

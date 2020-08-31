@@ -49,7 +49,8 @@ module.exports={
                         .exec(function(err,ogt_product){
                             Store.findOne({Store_Product : increaseInventoryProduct.Product, Size_Variant: increaseInventoryProduct.Size_Variant, Color_Variant:increaseInventoryProduct.Color_Variant })
                             .exec(function(err,storeProduct){
-                                //we need to add documents to product transaction model 
+                                //we need to add documents to product transaction model
+                                var CostToAdd = increaseInventoryProduct.Cost; 
                                 const newProductTransaction=new ProductTransaction();
                                 newProductTransaction.ProductTransaction_Date = document.IncreaseInventory_Date;
                                 newProductTransaction.ProductTransaction_Product = increaseInventoryProduct.Product;
@@ -63,11 +64,23 @@ module.exports={
                                     newProductTransaction.ProductTransaction_CostBeforAction = storeProduct.Store_Cost;
                                     newProductTransaction.ProductTransaction_SellPriceOnAction = ogt_product.Product_SellingPrice;
                                     newProductTransaction.ProductTransaction_QuantityAfterAction = storeProduct.Store_Quantity + increaseInventoryProduct.Quantity;
-                                    newProductTransaction.ProductTransaction_CostAfterAction = 11111;//needs modification
+                                    CostToAdd = ((storeProduct.Store_Cost * storeProduct.Store_Quantity) + (increaseInventoryProduct.Cost * increaseInventoryProduct.Quantity))/ (storeProduct.Store_Quantity + increaseInventoryProduct.Quantity)//11111;//needs modification
+                                    newProductTransaction.ProductTransaction_CostAfterAction = CostToAdd;
                                     newProductTransaction.save(function(err,xx){});
-                                    storeProduct.Store_Quantity=newProductTransaction.ProductTransaction_QuantityAfterAction;
+
+                                    //update new cost to current Items on the store
                                     storeProduct.Store_Cost=newProductTransaction.ProductTransaction_CostAfterAction;
                                     storeProduct.save(function(err){});
+
+                                    //insert new store for the new incoming items
+                                    let newStoreProduct = new Store();
+                                    newStoreProduct.Store_Product=increaseInventoryProduct.Product
+                                    newStoreProduct.Size_Variant=increaseInventoryProduct.Size_Variant
+                                    newStoreProduct.Color_Variant=increaseInventoryProduct.Color_Variant
+                                    newStoreProduct.Store_Quantity=increaseInventoryProduct.Quantity
+                                    newStoreProduct.Store_Cost = CostToAdd;
+                                    newStoreProduct.Store_StoragePlace = null;
+                                    newStoreProduct.save(function(err){});
 
                                 }else{
                                     newProductTransaction.ProductTransaction_QuantityBeforAction = 0;
