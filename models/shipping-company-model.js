@@ -8,7 +8,7 @@ var ShippingContractSchema= mongoose.Schema({
       default:    new Date(),
   },
   ContractDate                : Date,
-  ContractPriceAndCost        : {
+  ContractPriceAndCost        : [{
     Province: { 
       type:mongoose.Schema.Types.ObjectId,
       ref:'lut_province'
@@ -16,7 +16,7 @@ var ShippingContractSchema= mongoose.Schema({
     ShippingPrice   : Number,
     ShippingCost    : Number
 
-  },
+  }],
 })
 var ShippingCompanySchema = mongoose.Schema(
   {
@@ -25,6 +25,7 @@ var ShippingCompanySchema = mongoose.Schema(
     ShippingCompany_Email                 : String,
     ShippingCompany_Phone                 : String,
     ShippingCompany_WebsiteURL            : String,
+    ShippingCompany_TrakingURL            : String,
     ShippingCompany_FaceBookPageURL       : String,
     ShippingCompany_Country               : {
         type:mongoose.Schema.Types.ObjectId,
