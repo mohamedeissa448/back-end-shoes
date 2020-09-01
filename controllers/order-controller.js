@@ -564,7 +564,7 @@ module.exports={
         })
     },
     getUserOrders :(req,res)=>{
-        Order.find({Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo})
+        Order.find({Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo, Order_Status : "Created"})
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
         .exec((err,orders)=>{
             if(err){
@@ -609,7 +609,7 @@ module.exports={
     getOrderShippingDetailsById :(req,res)=>{
         Order.findById(req.body._id)
         .select('Order_Status Order_ShippingCompany Order_ShippingWaybill')
-        .populate({path:"Order_ShippingCompany"})
+        .populate({path:"Order_ShippingCompany",select:"ShippingCompany_Code ShippingCompany_Name ShippingCompany_Phone ShippingCompany_TrakingURL"})
         .exec((err,order)=>{
             if(err){
                 return res.send({
