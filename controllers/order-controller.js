@@ -495,6 +495,51 @@ module.exports={
         })
     },
 
+    getOnlyAssignedOrders:(req,res)=>{
+        Order.find({ 
+            Order_InvntoryHandlingAssignedTo : { $ne : null},
+            Order_Status                      : 'Created'
+        })
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .populate({path: 'Order_InvntoryHandlingAssignedTo' ,select: "User_Name"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+
+    getMyShippedOrders:(req,res)=>{
+        Order.find({ 
+            Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
+            Order_Status                      : 'Shipped'
+        })
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .populate({path: 'Order_InvntoryHandlingAssignedTo' ,select: "User_Name"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
     getUserOrders :(req,res)=>{
         Order.find({Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo, Order_Status : "Created"})
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
