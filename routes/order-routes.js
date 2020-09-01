@@ -25,7 +25,9 @@ router.post('/getFilteredOrdersByCustomerMobile',async function(req, res, next) 
 router.post('/editAffiliateSellerOrderByOrderId',async function(req, res, next) {
     await(orderController.editAffiliateSellerOrderByOrderId(req, res));
 });
-
+router.post('/decreaseStorePendingQuantityInStore',async function(req, res, next) {
+    await(orderController.decreaseStorePendingQuantityInStore(req, res));
+});
 router.post('/assignOrderTo',async function(req, res, next) {
     await(orderController.assignOrderTo(req, res));
 });

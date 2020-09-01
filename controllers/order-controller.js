@@ -116,14 +116,12 @@ module.exports={
        updatedAffiliateSellerOrder.Order_Note=req.body.Order_Note ;
        updatedAffiliateSellerOrder.Order_TotalProductSellingAmount= req.body.Order_TotalProductSellingAmount ;
        updatedAffiliateSellerOrder.Order_TotalProductCostAmount = req.body.Order_TotalProductCostAmount ;
-       updatedAffiliateSellerOrder.Order_CreatedType = "AffiliateSeller" ;
        updatedAffiliateSellerOrder.Order_Customer = req.body.Order_Customer;
        updatedAffiliateSellerOrder.Order_AffiliateSeller = req.body.Order_AffiliateSeller ;
        updatedAffiliateSellerOrder.Order_AffiliateSellerRevenuePercentage = seller.AffiliateSeller_RevenuePercentage ;
        updatedAffiliateSellerOrder.Order_AffiliateSellerRevenueAmount = seller.AffiliateSeller_RevenuePercentage * 0.01 * req.body.Order_TotalProductSellingAmount ;
        updatedAffiliateSellerOrder.Order_Products = req.body.Order_Products ;
        updatedAffiliateSellerOrder.Customer_ShippingAddress = req.body.Customer_ShippingAddress; 
-       updatedAffiliateSellerOrder.Order_Status = "Created";       
         var newvalues={
             $set:updatedAffiliateSellerOrder
         }
@@ -146,7 +144,7 @@ module.exports={
                                 })
                             }else if(storeDocument){
                                 //we need to check if already we increased Store_PendingQuantity in store for that product
-                                //we know if we increased Store_PendingQuantity property if the order product contains leftProductQuantity and it is defined and sets tio a value
+                                //we know if we increased Store_PendingQuantity property if the order product contains leftProductQuantity and it is defined and sets to a value
                                 if(orderProduct.leftProductQuantity == null){
                                     storeDocument.Store_PendingQuantity += orderProduct.Quantity ;
                                 }    
@@ -183,6 +181,31 @@ module.exports={
         }
     })
 },  
+
+    decreaseStorePendingQuantityInStore : (req,res)=>{
+        Store.findOne({Store_Product : req.body.Product,Size_Variant:req.body.Size_Variant,Color_Variant:req.body.Color_Variant})//we should increase filtering by: Store_StoragePlace:req.body.Store_StoragePlace
+        .exec(function(err,storeDocument){
+            console.log('storeDocument',storeDocument)
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(storeDocument){
+                storeDocument.Store_PendingQuantity -= req.body.Quantity ;
+                storeDocument.save(function(err,updatedStoreDocument){
+                    if(err){
+                         return res.send({  message2:err })
+                    }
+                    else 
+                        
+                        return res.send({message : true})
+                        
+                    
+                })
+            }
+            else return res.send({ message : "storeDocument is null"})
+        })
+    },
 
     assignOrderTo : (req,res)=>{
         var updatedValue = {
@@ -561,7 +584,7 @@ module.exports={
 
     getAffiliateSellerOrderById: (req,res)=>{
         Order.findById(req.body._id)
-        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Customer_ShippingAddress"})
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Customer_ShippingAddress Address"})
         .populate({path:"Order_ShippingCompany"})
         .populate({path:"Order_Products.Product"})
         .populate({path:"Order_Products.Size_Variant"})
