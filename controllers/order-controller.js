@@ -182,29 +182,51 @@ module.exports={
     })
 },  
 
-    decreaseStorePendingQuantityInStore : (req,res)=>{
-        Store.findOne({Store_Product : req.body.Product,Size_Variant:req.body.Size_Variant,Color_Variant:req.body.Color_Variant})//we should increase filtering by: Store_StoragePlace:req.body.Store_StoragePlace
-        .exec(function(err,storeDocument){
-            console.log('storeDocument',storeDocument)
-            if(err){
-                return res.send({
-                    message:err
-                })
-            }else if(storeDocument){
-                storeDocument.Store_PendingQuantity -= req.body.Quantity ;
-                storeDocument.save(function(err,updatedStoreDocument){
-                    if(err){
-                         return res.send({  message2:err })
+    deleteProductInOrder : (req,res)=>{
+        Order.findById(req.body.orderId)
+        .exec(function(err,orderDocument){
+            if(err) return res.send(err);
+            else if(orderDocument){
+                //first we need to delete the product in property Order_Products of the order document
+                let newOrderProducts = [];
+                orderDocument.Order_Products.forEach((product)=>{
+                    if(!(req.body.deletedProduct.Product == product.Product && req.body.deletedProduct.Size_Variant == product.Size_Variant && req.body.deletedProduct.Color_Variant == product.Color_Variant && req.body.deletedProduct.Quantity == product.Quantity && req.body.deletedProduct.StoreLocation == product.StoreLocation)){
+                        newOrderProducts.push(product)
                     }
-                    else 
-                        
-                        return res.send({message : true})
-                        
-                    
+                });
+                orderDocument.Order_Products = newOrderProducts ;
+                orderDocument.save(function(err,updatedOrderDocument){
+                    if(err) return res.send(err);
+                    else{
+                        //we need to update Store_PendingQuantity in the store by decreasing it by the quantity of the deleted product of the order
+                        Store.findOne({Store_Product : req.body.deletedProduct.Product,Size_Variant:req.body.deletedProduct.Size_Variant,Color_Variant:req.body.deletedProduct.Color_Variant})//we should increase filtering by: Store_StoragePlace:req.body.Store_StoragePlace
+                        .exec(function(err,storeDocument){
+                            console.log('storeDocument',storeDocument)
+                            if(err){
+                                return res.send({
+                                    message:err
+                                })
+                            }else if(storeDocument){
+                                storeDocument.Store_PendingQuantity -= req.body.deletedProduct.Quantity ;
+                                storeDocument.save(function(err,updatedStoreDocument){
+                                    if(err){
+                                        return res.send({  message2:err })
+                                    }
+                                    else 
+                                        
+                                        return res.send({message : true})
+                                        
+                      
+                                })
+                            }
+                            else return res.send({ message : "storeDocument is null"})
+                        })
+                    }
                 })
             }
-            else return res.send({ message : "storeDocument is null"})
+            else return res.send({message : "orderProductDocument is null"});
         })
+        
     },
 
     assignOrderTo : (req,res)=>{
@@ -229,14 +251,22 @@ module.exports={
         
     },
 
-    shipOrder : (req,res)=>{
+    shipOrderWithTheAbilityToEditOrder : (req,res)=>{
         var updatedValue = {
             $set: {
                 Order_ShippingCompany : req.body.Order_ShippingCompany,
                 Order_ShippingWaybill : req.body.Order_ShippingWaybill,
                 Order_ShippingPrice : req.body.Order_ShippingPrice,
                 Order_ShippingCost : req.body.Order_ShippingCost,
-                Order_Status: "Shipped"
+                Order_Status: "Shipped",
+                Order_Date:req.body.Order_Date ,
+                Order_Note:req.body.Order_Note ,
+                Order_TotalProductSellingAmount: req.body.Order_TotalProductSellingAmount ,
+                Order_TotalProductCostAmount : req.body.Order_TotalProductCostAmount ,
+                Order_Customer : req.body.Order_Customer,
+                Order_AffiliateSeller : req.body.Order_AffiliateSeller ,
+                Order_Products : req.body.Order_Products ,
+                Customer_ShippingAddress : req.body.Customer_ShippingAddress, 
             }
 
         }
@@ -247,11 +277,8 @@ module.exports={
                 })
             }else if(updatedDocment) {
                 var count = 0 ;
-                //incase of req.body.Order_ShippedAlready==true then we don't need to update store Store_PendingQuantity,Store_Quantity because they are already updated
-                if(req.body.Order_ShippedAlready == true){
-                    return res.send({message : true})
-                }else{
-                       //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
+                
+                //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
                  updatedDocment.Order_Products.forEach((orderProduct)=>{
                     Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
                     .exec(function(err,storeDocument){
@@ -285,7 +312,7 @@ module.exports={
                     }
                     })
                 });
-                }
+                
               
             }else{
                 return res.send({
