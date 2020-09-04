@@ -4,6 +4,8 @@ var passwordHash = require("password-hash");
 const config = require("../config");
 const authenticate = require("../authenticate");
 const User = require("../models/user-model");
+const System_Setting  = require('../models/system_setting');
+
 module.exports = {
   login: function(req, res, next) {
     passport.authenticate("login", function(err, user, info) {
@@ -145,6 +147,17 @@ module.exports = {
       }
     });
   },
+
+  getSystemPermisions:function(request, res) {
+		System_Setting.findOne({System_Setting_ConfigName:"CP_Users_Permissions"}, function(err, permision) {
+		    if (err){
+		    	res.send({message: 'Error'});
+		    }
+	        if (permision) {
+            res.send(permision.System_Setting_ConfigValue);
+			} 
+		});
+	},
   /*
   login: (req, res) => {
     const token = authenticate.getToken({

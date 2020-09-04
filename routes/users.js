@@ -43,5 +43,8 @@ router.post("/changePassword",async function(req, res) {
     await(usersController.changePassword(req, res));
   
 });
+router.get('/getSystemPermisions', async function(req, res) {
+    await (usersController.getSystemPermisions(req,res));
+});
 
 module.exports = router;
