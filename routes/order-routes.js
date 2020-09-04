@@ -25,13 +25,15 @@ router.post('/getFilteredOrdersByCustomerMobile',async function(req, res, next) 
 router.post('/editAffiliateSellerOrderByOrderId',async function(req, res, next) {
     await(orderController.editAffiliateSellerOrderByOrderId(req, res));
 });
-
+router.post('/deleteProductInOrder',async function(req, res, next) {
+    await(orderController.deleteProductInOrder(req, res));
+});
 router.post('/assignOrderTo',async function(req, res, next) {
     await(orderController.assignOrderTo(req, res));
 });
 
-router.post('/shipOrder',async function(req, res, next) {
-    await(orderController.shipOrder(req, res));
+router.post('/shipOrderWithTheAbilityToEditOrder',async function(req, res, next) {
+    await(orderController.shipOrderWithTheAbilityToEditOrder(req, res));
 });
 
 router.post('/cancelOrder',async function(req, res, next) {
