@@ -9,7 +9,6 @@ module.exports={
             var IncreaseInventoryProducts = await  InsertIntoIncreaseInventory(NextCode);
             var isInserted = await saveAll(IncreaseInventoryProducts);
             returnMessage();
-            
             function GetNexCode(){
                 return new Promise((resolve, reject) => {
                     IncreaseInventory.getLastCode(function(err, IncreaseInventoryItem) {
@@ -29,7 +28,6 @@ module.exports={
                     newIncreaseInventory.IncreaseInventory_Note = req.body.IncreaseInventory_Note;
                     newIncreaseInventory.IncreaseInventory_DoneBy_User = req.body.IncreaseInventory_DoneBy_User;
                     newIncreaseInventory.IncreaseInventory_Products = req.body.IncreaseInventory_Products;
-        
                     newIncreaseInventory.save((err,document)=>{
                         if(err){
                             return res.send({
@@ -45,9 +43,9 @@ module.exports={
             function saveAll(document){
                 return new Promise((resolve, reject) => {
                     document.IncreaseInventory_Products.forEach(function(increaseInventoryProduct, index){
-                        Ogt_Product.find({_id: increaseInventoryProduct.Product})
+                        Ogt_Product.find({_id: increaseInventoryProduct.Product}).select("Product_SellingPrice")
                         .exec(function(err,ogt_product){
-                            Store.findOne({Store_Product : increaseInventoryProduct.Product, Size_Variant: increaseInventoryProduct.Size_Variant, Color_Variant:increaseInventoryProduct.Color_Variant })
+                            Store.find({Store_Product : increaseInventoryProduct.Product, Size_Variant: increaseInventoryProduct.Size_Variant, Color_Variant:increaseInventoryProduct.Color_Variant })
                             .exec(function(err,storeProduct){
                                 //we need to add documents to product transaction model
                                 var CostToAdd = increaseInventoryProduct.Cost; 
@@ -59,18 +57,25 @@ module.exports={
                                 newProductTransaction.ProductTransaction_MathSign = 1;
                                 newProductTransaction.ProductTransaction_Type = "Increase Inventory";
                                 newProductTransaction.ProductTransaction_IncreaseInventory = document._id;
-                                if(storeProduct){
-                                    newProductTransaction.ProductTransaction_QuantityBeforAction = storeProduct.Store_Quantity;
-                                    newProductTransaction.ProductTransaction_CostBeforAction = storeProduct.Store_Cost;
+                                if(storeProduct.length >0){
+                                    var TotalStoredQuantity = 0;
+                                    storeProduct.forEach(function(storeProductItem, index){
+                                        TotalStoredQuantity = TotalStoredQuantity + storeProductItem.Store_Quantity;
+                                    })
+                                    newProductTransaction.ProductTransaction_QuantityBeforAction = storeProduct[0].Store_Quantity;
+                                    newProductTransaction.ProductTransaction_CostBeforAction = storeProduct[0].Store_Cost;
                                     newProductTransaction.ProductTransaction_SellPriceOnAction = ogt_product.Product_SellingPrice;
-                                    newProductTransaction.ProductTransaction_QuantityAfterAction = storeProduct.Store_Quantity + increaseInventoryProduct.Quantity;
-                                    CostToAdd = ((storeProduct.Store_Cost * storeProduct.Store_Quantity) + (increaseInventoryProduct.Cost * increaseInventoryProduct.Quantity))/ (storeProduct.Store_Quantity + increaseInventoryProduct.Quantity)//11111;//needs modification
+                                    newProductTransaction.ProductTransaction_QuantityAfterAction = TotalStoredQuantity + increaseInventoryProduct.Quantity;
+                                    CostToAdd = ((storeProduct[0].Store_Cost * TotalStoredQuantity) + (increaseInventoryProduct.Cost * increaseInventoryProduct.Quantity))/ (TotalStoredQuantity + increaseInventoryProduct.Quantity)//11111;//needs modification
                                     newProductTransaction.ProductTransaction_CostAfterAction = CostToAdd;
                                     newProductTransaction.save(function(err,xx){});
 
                                     //update new cost to current Items on the store
-                                    storeProduct.Store_Cost=newProductTransaction.ProductTransaction_CostAfterAction;
-                                    storeProduct.save(function(err){});
+                                    
+                                    storeProduct.forEach(function(storeProductItem, index){
+                                        storeProductItem.Store_Cost=CostToAdd;
+                                        storeProductItem.save(function(err){});
+                                    })
 
                                     //insert new store for the new incoming items
                                     let newStoreProduct = new Store();
@@ -81,7 +86,9 @@ module.exports={
                                     newStoreProduct.Store_Cost = CostToAdd;
                                     newStoreProduct.Store_StoragePlace = null;
                                     newStoreProduct.save(function(err){});
-
+                                    if(index == document.IncreaseInventory_Products.length -1){
+                                        resolve(true);
+                                    }
                                 }else{
                                     newProductTransaction.ProductTransaction_QuantityBeforAction = 0;
                                     newProductTransaction.ProductTransaction_CostBeforAction = 0;
@@ -98,24 +105,23 @@ module.exports={
                                     newStoreProduct.Store_Cost=increaseInventoryProduct.Cost
                                     newStoreProduct.Store_StoragePlace = null;
                                     newStoreProduct.save(function(err){});
+                                    if(index == document.IncreaseInventory_Products.length -1){
+                                        resolve(true);
+                                    }
                                 }
                             })
                         })
-                        if(index == document.IncreaseInventory_Products.lenth -1){
-                            resolve(true);
-                        }
                     })
                     
                 })
             }
             function returnMessage(){
-                return res.send({
+                res.send({
                     message:true
                 });
             }
         }
         UpdateTransactionAndStore();
-
            
 },
 

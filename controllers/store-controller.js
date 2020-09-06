@@ -159,7 +159,7 @@ getOneById:(req,res)=>{
         })
     },
     getAvilabelQuantity:(req,res)=>{
-        Store.findOne({ 
+        Store.find({ 
             Store_Product: req.body.Store_Product ,
             Size_Variant:  req.body.Size_Variant,
             Color_Variant: req.body.Color_Variant
@@ -171,9 +171,15 @@ getOneById:(req,res)=>{
                     status:false,
                     message:err
                 })
-            }else if(store) {
-                let AvilabelQuantity = store.Store_Quantity - store.Store_PendingQuantity;
-                let Store_Cost = store.Store_Cost;
+            }else if(store && store.length >0) {
+                var TotalStoredQuantity = 0;
+                var TotalPendingQuantity = 0;
+                store.forEach(function(storeProductItem, index){
+                    TotalStoredQuantity = TotalStoredQuantity + storeProductItem.Store_Quantity;
+                    TotalPendingQuantity = TotalPendingQuantity + storeProductItem.Store_PendingQuantity;
+                })
+                let AvilabelQuantity = TotalStoredQuantity - TotalPendingQuantity;
+                let Store_Cost = store[0].Store_Cost;
                 Product.findById(req.body['Store_Product']) 
                 .select('Product_SellingPrice')       
                 .exec((err,product)=>{
