@@ -1,9 +1,10 @@
-var Bill = require("../models/bill-model")
-var Supplier = require("../models/supplier-model")
+var Bill = require("../models/bill-model");
+var Supplier = require("../models/supplier-model");
+var Store = require("../models/store-model");
 module.exports={
     addSupplierBill:(req,res)=>{
         Bill.getLastCode(function(err, bill) {
-            if (bill) InsertIntoBill(product.Bill_Code + 1);
+            if (bill) InsertIntoBill(bill.Bill_Code + 1);
             else InsertIntoBill(1);
         });
         function InsertIntoBill(NextCode) {
@@ -39,8 +40,30 @@ module.exports={
                     Supplier.findByIdAndUpdate(billDocument.Bill_Supplier,updated,{upsert:true,new:true},(err,updatedSupplierDocumnet)=>{
                         if(err)
                             return res.json({ message : err});
-                        else if(updatedSupplierDocumnet)   
-                            return res.json({ message:true }) ;
+                        else if(updatedSupplierDocumnet){
+                            // we need to add the products in bill to the store
+                            let count = 0;
+                            req.body.Bill_Products.forEach((element)=>{
+                                let newProductInStore = {} ;
+                                newProductInStore.Store_Product = element.Product ;
+                                newProductInStore.Size_Variant = element.Size_Variant ;
+                                newProductInStore.Color_Variant = element.Color_Variant ;
+                                newProductInStore.Store_Quantity = element.Quantity ;
+                                newProductInStore.Store_Cost = element.Cost ;
+                                saveStore(newProductInStore);
+                            });
+                            function saveStore(storeObject){
+                                let newStoreDocument = new Store(storeObject);
+                                newStoreDocument.save(function(err,DOC){
+                                    count ++ ;
+                                    if(err) return res.send(err);
+                                    else if(count == req.body.Bill_Products.length ){
+                                        return res.json({ message : true })
+                                    }
+                                })
+                            }
+                        }
+
                         else
                             return res.json({ message: "updatedSupplierDocumnet is null" });
                     });

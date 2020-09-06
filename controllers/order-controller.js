@@ -195,6 +195,19 @@ module.exports={
                     }
                 });
                 orderDocument.Order_Products = newOrderProducts ;
+                //second we need to update Order_AffiliateSellerRevenueAmount
+                console.log("sellerMoneyDetails",req.body.sellerMoneyDetails)
+                let Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order = req.body.sellerMoneyDetails.Order_AffiliateSellerRevenueAmount;
+                console.log("Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order",Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order)
+
+                let order_Original_total_Price = Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order * req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage;
+                console.log("order_Original_total_Price",order_Original_total_Price)
+
+                let order_total_Price_after_Deleting = order_Original_total_Price - req.body.deletedProduct.Total_Price ;
+                console.log("order_total_Price_after_Deleting",order_total_Price_after_Deleting)
+                orderDocument.Order_AffiliateSellerRevenueAmount = req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage * 0.01 * order_total_Price_after_Deleting ;
+                
+                console.log("xx",req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage * 0.01 * order_total_Price_after_Deleting)
                 orderDocument.save(function(err,updatedOrderDocument){
                     if(err) return res.send(err);
                     else{
@@ -252,6 +265,9 @@ module.exports={
     },
 
     shipOrderWithTheAbilityToEditOrder : (req,res)=>{
+        // we donot need to update all order document properties such as the Order_AffiliateSeller,Order_AffiliateSellerRevenuePercentage
+        //as these properties were already set when the affiliate seller ordered the product
+        //what we need to do is to update affiliate seller's amount of money as order products might change when order is shipped in the shipping form
         var updatedValue = {
             $set: {
                 Order_ShippingCompany : req.body.Order_ShippingCompany,
@@ -263,8 +279,8 @@ module.exports={
                 Order_Note:req.body.Order_Note ,
                 Order_TotalProductSellingAmount: req.body.Order_TotalProductSellingAmount ,
                 Order_TotalProductCostAmount : req.body.Order_TotalProductCostAmount ,
+                Order_AffiliateSellerRevenueAmount : req.body.Order_AffiliateSellerRevenuePercentage * 0.01 * req.body.Order_TotalProductSellingAmount ,
                 Order_Customer : req.body.Order_Customer,
-                Order_AffiliateSeller : req.body.Order_AffiliateSeller ,
                 Order_Products : req.body.Order_Products ,
                 Customer_ShippingAddress : req.body.Customer_ShippingAddress, 
             }
@@ -292,20 +308,32 @@ module.exports={
                             storeDocument.Store_PendingQuantity -= orderProduct.Quantity ;
                             storeDocument.Store_Quantity -= orderProduct.Quantity ;
                             console.log('storeDocument2',storeDocument)
-                             storeDocument.save(function(err,updatedStoreDocument){
-                                if(err){
-                                    return res.send({
-                                        message4:err
-                                    })
-                                }else {
-                                    count ++ ;
-                                    if(count == updatedDocment.Order_Products.length){
-                                        return res.send({message : true})
+                            //if Store_Quantity == 0,we need to delete the document from store
+                            if(storeDocument.Store_Quantity == 0){
+                                storeDocument.remove(function(err,deletedDocument){
+                                    if(err) return res.send({message : err})
+                                    else {
+                                        count ++ ;
+                                        if(count == updatedDocment.Order_Products.length){
+                                            return res.send({message : true})
+                                        }
                                     }
-                                }
-                            })
-                            
-                       
+                                })
+                            }else{
+                                storeDocument.save(function(err,updatedStoreDocument){
+                                    if(err){
+                                        return res.send({
+                                            message4:err
+                                        })
+                                    }else {
+                                        count ++ ;
+                                        if(count == updatedDocment.Order_Products.length){
+                                            return res.send({message : true})
+                                        }
+                                    }
+                                })
+                            }
+                                    
                     }
                     else{
                         return res.send({message : "couldnot found order product in store"})
