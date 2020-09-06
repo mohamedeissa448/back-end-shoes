@@ -245,7 +245,8 @@ module.exports={
     assignOrderTo : (req,res)=>{
         var updatedValue = {
             $set: {
-                Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo
+                Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
+                Order_Status : "Assigned"
             }
         }
         Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true},function(err,updatedDocment){
@@ -576,7 +577,7 @@ module.exports={
     getOnlyAssignedOrders:(req,res)=>{
         Order.find({ 
             Order_InvntoryHandlingAssignedTo : { $ne : null},
-            Order_Status                      : 'Created'
+            Order_Status                      : 'Assigned'
         })
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
         .populate({path: 'Order_InvntoryHandlingAssignedTo' ,select: "User_Name"})
@@ -619,7 +620,7 @@ module.exports={
         })
     },
     getUserOrders :(req,res)=>{
-        Order.find({Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo, Order_Status : "Created"})
+        Order.find({Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo, Order_Status : "Assigned"})
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
         .exec((err,orders)=>{
             if(err){
