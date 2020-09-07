@@ -265,6 +265,56 @@ module.exports={
         
     },
 
+    reAssignOrderTo : (req,res)=>{
+        var updatedValue = {
+            $set: {
+                Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
+                Order_Status : "Assigned"
+            }
+        }
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true},function(err,updatedOrderDocment){
+            if(err){
+                return res.send({
+                    message1:err
+                })
+            }else if(updatedOrderDocment) {
+                var count = 0 ;
+                 //we need to update  Store_PendingQuantity  property in store model for each ordered product
+                 updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
+                    Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
+                    .exec(function(err,storeDocument){
+                        console.log('storeDocument1',storeDocument)
+                        if(err){
+                            return res.send({
+                                message2:err
+                            })
+                        }else if(storeDocument){
+                            storeDocument.Store_PendingQuantity += orderProduct.Quantity ;
+                            console.log('storeDocument2',storeDocument)
+                             storeDocument.save(function(err,updatedStoreDocument){
+                                if(err){
+                                    return res.send({
+                                        message3:err
+                                    })
+                                }else {
+                                    count ++ ;
+                                    if(count == updatedOrderDocment.Order_Products.length){
+                                        return res.send({ message : true});
+                                    }
+                                }
+                            })
+                        }else return res.json({message : "store document not found"})
+                    })
+                })
+            }else{
+                return res.send({
+                    message:"updatedDocment is null"
+                });
+            }
+        })
+        
+    },
+
     shipOrderWithTheAbilityToEditOrder : (req,res)=>{
         // we donot need to update all order document properties such as the Order_AffiliateSeller,Order_AffiliateSellerRevenuePercentage
         //as these properties were already set when the affiliate seller ordered the product
@@ -367,7 +417,7 @@ module.exports={
                 })
             }else if(updatedOrderDocment) {
                 var count = 0 ;
-                 //we need to update store Store_PendingQuantity,Store_Quantity  property in store model for each ordered product
+                 //we need to update store Store_PendingQuantity  property in store model for each ordered product
                  updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
                     Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
                     .exec(function(err,storeDocument){
@@ -555,8 +605,46 @@ module.exports={
         
     },
 
-    getAll:(req,res)=>{
+    getAll :(req,res)=>{
         Order.find({})
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+
+    getAllOrdersExceptCancelledOnes :(req,res)=>{
+        Order.find({ Order_Status : {$ne : "Cancelled"}})
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+
+    getAllCancelledOrders :(req,res)=>{
+        Order.find({ Order_Status :  "Cancelled" })
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
         .exec((err,orders)=>{
             if(err){

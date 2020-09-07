@@ -33,7 +33,7 @@ module.exports={
 
 getAll:(req,res)=>{
     Store.find({})
-    .populate({path:"Store_Product", select:"Product_Name Product_Code"})
+    .populate({path:"Store_Product", select:"Product_Name Product_Code Product_DefaultImages_Media Product_SellingPrice"})
     .populate({path:"Size_Variant", select:"Size_Name"})
     .populate({path:"Color_Variant", select:"Color_Name"})
     .populate({path:"Store_StoragePlace", select:"StoragePlace_DisplayName"})
@@ -212,6 +212,21 @@ getOneById:(req,res)=>{
                 })
             }
 
+        })
+    },
+
+    searchProductInStore : (req,res)=>{
+        Store.find(req.body)
+        .populate({path:"Store_Product", select:"Product_Name Product_Code Product_DefaultImages_Media Product_SellingPrice"})
+        .populate({path:"Size_Variant", select:"Size_Name"})
+        .populate({path:"Color_Variant", select:"Color_Name"})
+            .exec(function(err,products){
+            if(err)
+                return res.send(err);
+            else if(products.length > 0)
+                return res.json({products : products ,message : true})
+            else
+                return res.json({message : "No product is found"})        
         })
     }
 }
