@@ -113,4 +113,27 @@ router.post("/getFilteredReturnedOrdersByCustomerMobile",async function(req, res
     await(affiliateSellerController.getFilteredReturnedOrdersByCustomerMobile(req, res));
 });
 
+/********** for  Statistics    */
+router.post('/getCountOfCanceledOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(affiliateSellerController.getCountOfCanceledOrdersByAffiliateSellerId(req, res));
+});
+
+router.post('/getCountOfReturnedOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(affiliateSellerController.getCountOfReturnedOrdersByAffiliateSellerId(req, res));
+});
+
+router.post('/getCountOfCollectedOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(affiliateSellerController.getCountOfCollectedOrdersByAffiliateSellerId(req, res));
+});
+
+router.post('/getCountOfShippedOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(affiliateSellerController.getCountOfShippedOrdersByAffiliateSellerId(req, res));
+});
+
+router.post('/getCountOfAllOrdersByAffiliateSellerId',async function(req, res, next) {
+    await(affiliateSellerController.getCountOfAllOrdersByAffiliateSellerId(req, res));
+});
+router.post('/getAffiliateSellerBalance',async function(req, res, next) {
+    await(affiliateSellerController.getAffiliateSellerBalance(req, res));
+});
 module.exports = router;

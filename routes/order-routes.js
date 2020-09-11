@@ -31,7 +31,9 @@ router.post('/deleteProductInOrder',async function(req, res, next) {
 router.post('/assignOrderTo',async function(req, res, next) {
     await(orderController.assignOrderTo(req, res));
 });
-
+router.post('/reAssignOrderTo',async function(req, res, next) {
+    await(orderController.reAssignOrderTo(req, res));
+});
 router.post('/shipOrderWithTheAbilityToEditOrder',async function(req, res, next) {
     await(orderController.shipOrderWithTheAbilityToEditOrder(req, res));
 });
@@ -50,6 +52,12 @@ router.post('/returnOrderProducts',async function(req, res, next) {
 
 router.get('/getAll',async function(req, res, next) {
     await(orderController.getAll(req, res));
+});
+router.get('/getAllOrdersExceptCancelledOnes',async function(req, res, next) {
+    await(orderController.getAllOrdersExceptCancelledOnes(req, res));
+});
+router.get('/getAllCancelledOrders',async function(req, res, next) {
+    await(orderController.getAllCancelledOrders(req, res));
 });
 router.get('/getOnlyAssignedOrders',async function(req, res, next) {
     await(orderController.getOnlyAssignedOrders(req, res));
@@ -74,24 +82,5 @@ router.post('/getOrdersByUserId',async function(req, res, next) {
 router.post('/getOneById',async function(req, res, next) {
     await(orderController.getOneById(req, res));
 })
-/********** for  Statistics    */
-router.post('/getCountOfCanceledOrdersByAffiliateSellerId',async function(req, res, next) {
-    await(orderController.getCountOfCanceledOrdersByAffiliateSellerId(req, res));
-});
 
-router.post('/getCountOfReturnedOrdersByAffiliateSellerId',async function(req, res, next) {
-    await(orderController.getCountOfReturnedOrdersByAffiliateSellerId(req, res));
-});
-
-router.post('/getCountOfCollectedOrdersByAffiliateSellerId',async function(req, res, next) {
-    await(orderController.getCountOfCollectedOrdersByAffiliateSellerId(req, res));
-});
-
-router.post('/getCountOfShippedOrdersByAffiliateSellerId',async function(req, res, next) {
-    await(orderController.getCountOfShippedOrdersByAffiliateSellerId(req, res));
-});
-
-router.post('/getCountOfAllOrdersByAffiliateSellerId',async function(req, res, next) {
-    await(orderController.getCountOfAllOrdersByAffiliateSellerId(req, res));
-});
 module.exports = router;

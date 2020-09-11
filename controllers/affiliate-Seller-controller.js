@@ -654,5 +654,107 @@ getFilteredCanceledOrdersByCustomerMobile :(req,res)=>{
         });
       },
 
+       /**********     for Statistics      ******** */
+    getCountOfCanceledOrdersByAffiliateSellerId  : (req,res)=>{
+      Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Cancelled'})
+      .countDocuments(function(err, count){
+          if(err){
+              return res.send({
+                  message:err
+              })
+          }else if(count) {
+              return res.send({ count:count ,message : true })
+          }else{
+              return res.send({
+                  message:"count is null"
+              })
+          }
+      });   
+  },  
+
+  getCountOfReturnedOrdersByAffiliateSellerId  : (req,res)=>{
+      Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Returned'})
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:err
+              })
+          }else if(count) {
+              return res.json({ count:count ,message : true })
+          }else{
+              return res.json({
+                  message:"count is null"
+              })
+          }
+      });   
+  },
+  getCountOfCollectedOrdersByAffiliateSellerId  : (req,res)=>{
+      Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Collected'})
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:err
+              })
+          }else if(count) {
+              return res.json({ count:count ,message : true })
+          }else{
+              return res.json({
+                  message:"count is null"
+              })
+          }
+      });   
+  },
+
+  getCountOfShippedOrdersByAffiliateSellerId  : (req,res)=>{
+      Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller,Order_Status : 'Shipped'})
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:err
+              })
+          }else if(count) {
+              return res.json({ count:count ,message : true })
+          }else{
+              return res.json({
+                  message:"count is null"
+              })
+          }
+      });   
+  },
+
+  getCountOfAllOrdersByAffiliateSellerId  : (req,res)=>{
+      Order.find({ Order_AffiliateSeller : req.body.Order_AffiliateSeller})
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:err
+              })
+          }else if(count) {
+              return res.json({ count:count ,message : true })
+          }else{
+              return res.json({
+                  message:"count is null"
+              })
+          }
+      });   
+  },
+
+  getAffiliateSellerBalance : (req,res)=>{
+    AffiliateSeller.findById( req.body._id )
+    .select("AffiliateSeller_PaymentLog")
+    .exec(function(err, seller){
+        if(err){
+            return res.json({
+                message:err
+            })
+        }else if(seller) {
+            return res.json({ AffiliateSeller_PaymentLog: seller.AffiliateSeller_PaymentLog ,message : true })
+        }else{
+            return res.json({
+                message:"seller is not found"
+            })
+        }
+    });   
+},
    
 }
