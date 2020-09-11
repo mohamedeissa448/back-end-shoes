@@ -143,6 +143,7 @@ getOneById:(req,res)=>{
             Size_Variant:  req.body.Size_Variant,
             Color_Variant: req.body.Color_Variant
         })
+        .populate({path:"Store_StoragePlace"})
         .exec((err,store)=>{
             if(err){
                 return res.send({
