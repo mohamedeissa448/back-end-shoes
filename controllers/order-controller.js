@@ -180,41 +180,80 @@ module.exports={
             })
         }
     })
-},  
-
+    },  
+    addProductToOrder : (req,res)=>{
+        Order.findById(req.body.orderId)
+        .exec(function(err,orderDocument){
+            orderDocument.Order_Products.push({
+                "Product" : req.body.AddedProduct.Product, 
+                "Size_Variant" : req.body.AddedProduct.Size_Variant, 
+                "Color_Variant" : req.body.AddedProduct.Color_Variant, 
+                "Quantity" : req.body.AddedProduct.Quantity, 
+                "Cost" : req.body.AddedProduct.Cost, 
+                "Price" : req.body.AddedProduct.Total_Price
+            })
+            var AffiliateSellerRevenueAmountToAdd = (req.body.AddedProduct.Total_Price * orderDocument.Order_AffiliateSellerRevenuePercentage)/100;
+            orderDocument.Order_AffiliateSellerRevenueAmount += AffiliateSellerRevenueAmountToAdd;
+            orderDocument.Order_TotalProductSellingAmount += req.body.AddedProduct.Total_Price;
+            orderDocument.Order_TotalProductCostAmount += req.body.AddedProduct.Cost;
+            orderDocument.save(function(err,updatedOrderDocument){
+                Store.findOne({
+                    Store_Product : req.body.AddedProduct.Product,
+                    Size_Variant:req.body.AddedProduct.Size_Variant,
+                    Color_Variant:req.body.AddedProduct.Color_Variant
+                }).exec(function(err,storeDocument){
+                    if(storeDocument.Store_PendingQuantity)
+                        storeDocument.Store_PendingQuantity += req.body.AddedProduct.Quantity ;
+                    else
+                        storeDocument.Store_PendingQuantity = req.body.AddedProduct.Quantity;
+                    storeDocument.save(function(err,updatedStoreDocument){
+                        AffiliateSeller.findOne({
+                            _id:orderDocument.Order_AffiliateSeller
+                        }).exec(function(err,affilateSellerDocument){
+                            for(var i = 0; i < affilateSellerDocument.AffiliateSeller_CreatedOrders.length; i++) {
+                                if(String(affilateSellerDocument.AffiliateSeller_CreatedOrders[i].Order_RefrencedOrder) === String(req.body.orderId)) {
+                                    affilateSellerDocument.AffiliateSeller_CreatedOrders[i].Order_TotalAmount +=  req.body.AddedProduct.Total_Price;
+                                    affilateSellerDocument.AffiliateSeller_CreatedOrders[i].Order_AffiliateSellerRevenueAmount +=  AffiliateSellerRevenueAmountToAdd;
+                                    affilateSellerDocument.save(function(err,updatedStoreDocument){
+                                        if(err){
+                                            return res.send({  message2:err })
+                                        }
+                                        else{
+                                            return res.send({message : true})
+                                        }
+                                    })
+                                }
+                            }
+                        })
+                    })
+                }) 
+            })
+        })
+    },
     deleteProductInOrder : (req,res)=>{
         Order.findById(req.body.orderId)
         .exec(function(err,orderDocument){
             if(err) return res.send(err);
             else if(orderDocument){
                 //first we need to delete the product in property Order_Products of the order document
-                let newOrderProducts = [];
-                orderDocument.Order_Products.forEach((product)=>{
-                    if(!(req.body.deletedProduct.Product == product.Product && req.body.deletedProduct.Size_Variant == product.Size_Variant && req.body.deletedProduct.Color_Variant == product.Color_Variant && req.body.deletedProduct.Quantity == product.Quantity && req.body.deletedProduct.StoreLocation == product.StoreLocation)){
-                        newOrderProducts.push(product)
-                    }
-                });
-                orderDocument.Order_Products = newOrderProducts ;
+                orderDocument.Order_Products = orderDocument.Order_Products.filter(x => {
+                    x._id !== req.body.deletedProduct.Product
+                })
                 //second we need to update Order_AffiliateSellerRevenueAmount
-                console.log("sellerMoneyDetails",req.body.sellerMoneyDetails)
-                let Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order = req.body.sellerMoneyDetails.Order_AffiliateSellerRevenueAmount;
-                console.log("Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order",Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order)
-
-                let order_Original_total_Price = Order_AffiliateSellerRevenueAmount_Before_Deleting_Product_From_Order * req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage;
-                console.log("order_Original_total_Price",order_Original_total_Price)
-
-                let order_total_Price_after_Deleting = order_Original_total_Price - req.body.deletedProduct.Total_Price ;
-                console.log("order_total_Price_after_Deleting",order_total_Price_after_Deleting)
-                orderDocument.Order_AffiliateSellerRevenueAmount = req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage * 0.01 * order_total_Price_after_Deleting ;
-                
-                console.log("xx",req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage * 0.01 * order_total_Price_after_Deleting)
+                var amountToDeduct = (req.body.deletedProduct.Total_Price * req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage)/100;
+                orderDocument.Order_AffiliateSellerRevenueAmount -=  amountToDeduct;
+                orderDocument.Order_TotalProductSellingAmount -= req.body.deletedProduct.Total_Price;
+                orderDocument.Order_TotalProductCostAmount -=  req.body.deletedProduct.Cost;
                 orderDocument.save(function(err,updatedOrderDocument){
                     if(err) return res.send(err);
                     else{
                         //we need to update Store_PendingQuantity in the store by decreasing it by the quantity of the deleted product of the order
-                        Store.findOne({Store_Product : req.body.deletedProduct.Product,Size_Variant:req.body.deletedProduct.Size_Variant,Color_Variant:req.body.deletedProduct.Color_Variant})//we should increase filtering by: Store_StoragePlace:req.body.Store_StoragePlace
-                        .exec(function(err,storeDocument){
-                            console.log('storeDocument',storeDocument)
+                        Store.findOne({
+                            Store_Product : req.body.deletedProduct.Product,
+                            Size_Variant:req.body.deletedProduct.Size_Variant,
+                            Color_Variant:req.body.deletedProduct.Color_Variant,
+                            Store_PendingQuantity : { $gte: 1} //using this instead of filtering by: Store_StoragePlace
+                        }).exec(function(err,storeDocument){
                             if(err){
                                 return res.send({
                                     message:err
@@ -225,11 +264,28 @@ module.exports={
                                     if(err){
                                         return res.send({  message2:err })
                                     }
-                                    else 
+                                    else {
+                                        AffiliateSeller.findOne({
+                                            _id:req.body.sellerMoneyDetails.Order_AffiliateSeller
+                                        }).exec(function(err,affilateSellerDocument){
+                                            for(var i = 0; i < affilateSellerDocument.AffiliateSeller_CreatedOrders.length; i++) {
+                                                if(String(affilateSellerDocument.AffiliateSeller_CreatedOrders[i].Order_RefrencedOrder) === String(req.body.orderId)) {
+                                                    affilateSellerDocument.AffiliateSeller_CreatedOrders[i].Order_TotalAmount -=  req.body.deletedProduct.Total_Price;
+                                                    affilateSellerDocument.AffiliateSeller_CreatedOrders[i].Order_AffiliateSellerRevenueAmount -=  amountToDeduct;
+                                                    affilateSellerDocument.save(function(err,updatedStoreDocument){
+                                                        if(err){
+                                                            return res.send({  message2:err })
+                                                        }
+                                                        else{
+                                                            return res.send({message : true})
+                                                        }
+                                                    })
+                                                }
+                                            }
+                                        })
                                         
-                                        return res.send({message : true})
+                                    }
                                         
-                      
                                 })
                             }
                             else return res.send({ message : "storeDocument is null"})
@@ -326,13 +382,13 @@ module.exports={
                 Order_ShippingPrice : req.body.Order_ShippingPrice,
                 Order_ShippingCost : req.body.Order_ShippingCost,
                 Order_Status: "Shipped",
-                Order_Date:req.body.Order_Date ,
+               // Order_Date:req.body.Order_Date ,
                 Order_Note:req.body.Order_Note ,
-                Order_TotalProductSellingAmount: req.body.Order_TotalProductSellingAmount ,
-                Order_TotalProductCostAmount : req.body.Order_TotalProductCostAmount ,
-                Order_AffiliateSellerRevenueAmount : req.body.Order_AffiliateSellerRevenuePercentage * 0.01 * req.body.Order_TotalProductSellingAmount ,
-                Order_Customer : req.body.Order_Customer,
-                Order_Products : req.body.Order_Products ,
+                // Order_TotalProductSellingAmount: req.body.Order_TotalProductSellingAmount ,
+                // Order_TotalProductCostAmount : req.body.Order_TotalProductCostAmount ,
+                // Order_AffiliateSellerRevenueAmount : req.body.Order_AffiliateSellerRevenuePercentage * 0.01 * req.body.Order_TotalProductSellingAmount ,
+                // // Order_Customer : req.body.Order_Customer,
+                // Order_Products : req.body.Order_Products ,
                 Customer_ShippingAddress : req.body.Customer_ShippingAddress, 
             }
 
@@ -349,16 +405,13 @@ module.exports={
                  updatedDocment.Order_Products.forEach((orderProduct)=>{
                     Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
                     .exec(function(err,storeDocument){
-                        console.log('storeDocument1',storeDocument)
                         if(err){
                             return res.send({
                                 message3:err
                             })
                         }else if(storeDocument){
-                            
                             storeDocument.Store_PendingQuantity -= orderProduct.Quantity ;
                             storeDocument.Store_Quantity -= orderProduct.Quantity ;
-                            console.log('storeDocument2',storeDocument)
                             //if Store_Quantity == 0,we need to delete the document from store
                             if(storeDocument.Store_Quantity == 0){
                                 storeDocument.remove(function(err,deletedDocument){

@@ -34,7 +34,21 @@ var AffiliateSellerOrdersSchema= mongoose.Schema({
     ref:'ogt_order'
   },
 })
-
+var AffiliateSellerFinancialTransactionSchema =new mongoose.Schema({
+  
+  AffiliateSellerFinancialTransaction_SysDate                   : { // automatic record the insert date
+      type:Date,
+      default:    new Date(),
+  },
+  AffiliateSellerFinancialTransaction_Date                      : Date, // As Defined in the action
+  AffiliateSellerFinancialTransaction_MathSign                  : Number, // (-1 for Payments or returns) and (1 for Purchasing)
+  AffiliateSellerFinancialTransaction_Amount                    : Number ,
+  AffiliateSellerFinancialTransaction_Order                     : { // for which order this transaction is related to
+    type: mongoose.Schema.Types.ObjectId,
+    ref:'ogt_order'
+  },
+  AffiliateSellerFinancialTransaction_Type                      : String, // order, return, Payment
+});
 var AffiliateSellerSchema = mongoose.Schema(
   {
     AffiliateSeller_Code                        : Number,
@@ -87,7 +101,7 @@ var AffiliateSellerSchema = mongoose.Schema(
     AffiliateSeller_DeliveredOrders             : [AffiliateSellerOrdersSchema], // update whenerver an order is Collected to us
     AffiliateSeller_ReturnedOrders              : [AffiliateSellerOrdersSchema], // update whenerver an order is returned
     AffiliateSeller_CanceledOrders              : [AffiliateSellerOrdersSchema], // update whenerver an order is canceled
-
+    AffiliateSeller_FinancialTransactions       : [AffiliateSellerFinancialTransactionSchema],// Update whenever an order is shiped, returned, and on payments 
     AffiliateSeller_CreationSysDate             : { // automatic record the Creation date
       type:Date,
       default:    new Date(),

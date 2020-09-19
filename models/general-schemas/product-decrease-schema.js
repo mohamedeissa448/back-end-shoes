@@ -17,6 +17,7 @@ var ProductDecreaseSchema = mongoose.Schema({
     Cost                            : Number,
     StoreLocation                   : Number, // should be ref with store location model
     Price                           : Number,
+    Product_ReturnStatus            : String, // Returned, If the product is retruned. filled on return order
   },{
     toJSON: { virtuals: true }
   });
