@@ -321,11 +321,11 @@ module.exports={
         
     },
 
-    reAssignOrderTo : (req,res)=>{
+    changeOrderFromCancelledToCreated : (req,res)=>{
         var updatedValue = {
             $set: {
-                Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
-                Order_Status : "Assigned"
+                Order_InvntoryHandlingAssignedTo : null,
+                Order_Status : "Created"
             }
         }
         Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true},function(err,updatedOrderDocment){
@@ -355,12 +355,78 @@ module.exports={
                                 }else {
                                     count ++ ;
                                     if(count == updatedOrderDocment.Order_Products.length){
+                                        //remove order from affiliate seller AffiliateSeller_CanceledOrders property
+                                        AffiliateSeller.findById(updatedOrderDocment.Order_AffiliateSeller)
+                                        .exec(function(err,sellerDocument){
+                                            if(err) return res.json({message :err})
+                                            else if(sellerDocument){
+                                                sellerDocument.AffiliateSeller_CanceledOrders.forEach((element)=>{
+                                                    if(element.Order_RefrencedOrder == updatedOrderDocment._id){
+                                                        sellerDocument.AffiliateSeller_CanceledOrders.splice( element, 1);
+                                                    }
+                                                })
+                                                sellerDocument.save((function(err,updatedSellerDocument){
+                                                    if(err) return res.json({message :err})
+                                                    else 
+                                                    return res.json({message : true})
+                                                }))
+                                               
+                                            }
+                                            else return res.json({message : false})
+                                        })
                                         return res.send({ message : true});
                                     }
                                 }
                             })
                         }else return res.json({message : "store document not found"})
                     })
+                })
+            }else{
+                return res.send({
+                    message:"updatedDocment is null"
+                });
+            }
+        })
+        
+    },
+    onlyChangeOrderEmployee :(req,res)=>{
+        var updatedValue = {
+            $set: {
+                Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
+            }
+        }
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true},function(err,updatedOrderDocment){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(updatedOrderDocment) {
+                return res.send({
+                    message:true
+                })
+            }else{
+                return res.send({
+                    message:"updatedDocment is null"
+                });
+            }
+        })
+        
+    },
+    assignOrderToEmployee :(req,res)=>{
+        var updatedValue = {
+            $set: {
+                Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
+                Order_Status : "Assigned"
+            }
+        }
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true},function(err,updatedOrderDocment){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(updatedOrderDocment) {
+                return res.send({
+                    message:true
                 })
             }else{
                 return res.send({
@@ -698,7 +764,25 @@ module.exports={
 
     getAllCancelledOrders :(req,res)=>{
         Order.find({ Order_Status :  "Cancelled" })
-        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Address"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+    getAllCreatedOrders :(req,res)=>{
+        Order.find({ Order_Status :  "Created" })
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Address"})
         .exec((err,orders)=>{
             if(err){
                 return res.send({
@@ -715,12 +799,13 @@ module.exports={
         })
     },
 
+
     getOnlyAssignedOrders:(req,res)=>{
         Order.find({ 
             Order_InvntoryHandlingAssignedTo : { $ne : null},
             Order_Status                      : 'Assigned'
         })
-        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Address"})
         .populate({path: 'Order_InvntoryHandlingAssignedTo' ,select: "User_Name"})
         .exec((err,orders)=>{
             if(err){
@@ -783,10 +868,9 @@ module.exports={
         Order.findById(req.body._id)
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Customer_ShippingAddress Address"})
         .populate({path:"Order_ShippingCompany"})
-        .populate({path:"Order_Products.Product"})
-        .populate({path:"Order_Products.Size_Variant"})
-        .populate({path:"Order_Products.Color_Variant"})
-
+        .populate({path:"Order_Productss.Product"})
+        .populate({path:"Order_Productss.Size_Variant"})
+        .populate({path:"Order_Productss.Color_Variant"})
         .exec((err,order)=>{
             if(err){
                 return res.send({
@@ -1034,6 +1118,119 @@ module.exports={
                   }
             })
         },
+        
+        
+        
+    searchOrders: (req,res)=>{
+        Order.find(req.body)
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name "})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders.length >0 ) {
+                return res.json({
+                    orders : orders,
+                    message : true
+                })
+            }else{
+                return res.send({
+                    message: false
+                })
+            }
+
+        })
+    },
+
+    returnOneProductFromOrder: (req,res)=>{
+        var updatedValue = {
+            $set: {
+                Order_Status : "Returned",
+                Order_AffiliateSellerRevenueAmount : req.body.Order_AffiliateSellerRevenuePercentage * (req.body.Original_Order_TotalProductSellingAmount - req.body.Order_Return_Details.Return_Product.Price) / 100
+            },
+            $inc: {
+                Order_TotalProductSellingAmount   : -1 * req.body.Order_Return_Details.Return_Product.Price ,
+                Order_TotalProductCostAmount      : -1 * req.body.Order_Return_Details.Return_Product.Cost ,
+            },
+            $push:{
+                Order_Return_Details : req.body.Order_Return_Details
+            }
+        };
+
+        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(updatedOrderDocment) {
+                 //we need to update store Store_Quantity  property in store model for the returned ordered product
+                let returnProduct = req.body.Order_Return_Details.Return_Product ;
+                Store.findOne({Store_Product : returnProduct.Product,Size_Variant:returnProduct.Size_Variant,Color_Variant:returnProduct.Color_Variant,                            Store_PendingQuantity : { $gte: 1} //using this instead of filtering by: Store_StoragePlace
+                })
+                .exec(function(err,storeDocument){
+                    console.log('storeDocument1',storeDocument)
+                    if(err){
+                        return res.send({ message3:err })
+                    }else if(storeDocument){
+                        storeDocument.Store_Quantity += returnProduct.Quantity ;
+                        console.log('storeDocument2',storeDocument)
+                        storeDocument.save(function(err,updatedStoreDocument){
+                            if(err){
+                                return res.send({ message4:err})
+                            }else {
+                                //we need to add this order to AffiliateSeller_ReturnedOrders property of affiliate seller model
+                                let updated ={
+                                    $push :{
+                                        AffiliateSeller_ReturnedOrders : {
+                                            Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
+                                            Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                                            Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
+                                            Order_RefrencedOrder: updatedOrderDocment._id
+                                        },
+                                        AffiliateSeller_FinancialTransactions : {
+                                            AffiliateSellerFinancialTransaction_Date : updatedOrderDocment.Order_Date ,
+                                            AffiliateSellerFinancialTransaction_MathSign : -1 ,
+                                            AffiliateSellerFinancialTransaction_Amount : returnProduct.Price * updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                                            AffiliateSellerFinancialTransaction_Order : updatedOrderDocment._id ,
+                                            AffiliateSellerFinancialTransaction_Type : "return"
+
+                                        }
+                                    }
+                                };
+                                AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
+                                    .exec(function(err,updatedSellerDocument){
+                                        if(err){
+                                            return res.send({
+                                                    message:err
+                                        });
+                                        }else if(updatedSellerDocument) {
+                                            return res.send({ message : true });
+                                        }
+                                        else{
+                                            return res.send({  message:"updated seller is null" });
+                                        }
+                                    })
+                                    
+                                }
+                            })
+                            
+                       
+                    }
+                    else{
+                        return res.send({message : "couldnot found order product in store"})
+                    }
+                })
+                
+            }else{
+                return res.send({
+                    message:"updatedDocment is null"
+                });
+            }
+        })
+        
+    },
+        
     
        
 }

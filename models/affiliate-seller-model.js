@@ -114,11 +114,6 @@ var AffiliateSellerSchema = mongoose.Schema(
       type: Boolean,
       default: true
     },
-    //user properties
-    //User_Code: Number,
-    //User_Name: String,
-    //User_Password: String,
-    //User_Permissions: [String],
     
   },{
     toJSON: { virtuals: true }

@@ -34,8 +34,15 @@ router.post('/deleteProductInOrder',async function(req, res, next) {
 router.post('/assignOrderTo',async function(req, res, next) {
     await(orderController.assignOrderTo(req, res));
 });
-router.post('/reAssignOrderTo',async function(req, res, next) {
-    await(orderController.reAssignOrderTo(req, res));
+
+router.post('/changeOrderFromCancelledToCreated',async function(req, res, next) {
+    await(orderController.changeOrderFromCancelledToCreated(req, res));
+});
+router.post('/onlyChangeOrderEmployee',async function(req, res, next) {
+    await(orderController.onlyChangeOrderEmployee(req, res));
+});
+router.post('/assignOrderToEmployee',async function(req, res, next) {
+    await(orderController.assignOrderToEmployee(req, res));
 });
 router.post('/shipOrderWithTheAbilityToEditOrder',async function(req, res, next) {
     await(orderController.shipOrderWithTheAbilityToEditOrder(req, res));
@@ -53,11 +60,18 @@ router.post('/returnOrderProducts',async function(req, res, next) {
     await(orderController.returnOrderProducts(req, res));
 });
 
+router.post('/returnOneProductFromOrder',async function(req, res, next) {
+    await(orderController.returnOneProductFromOrder(req, res));
+});
+
 router.get('/getAll',async function(req, res, next) {
     await(orderController.getAll(req, res));
 });
 router.get('/getAllOrdersExceptCancelledOnes',async function(req, res, next) {
     await(orderController.getAllOrdersExceptCancelledOnes(req, res));
+});
+router.get('/getAllCreatedOrders',async function(req, res, next) {
+    await(orderController.getAllCreatedOrders(req, res));
 });
 router.get('/getAllCancelledOrders',async function(req, res, next) {
     await(orderController.getAllCancelledOrders(req, res));
@@ -86,4 +100,7 @@ router.post('/getOneById',async function(req, res, next) {
     await(orderController.getOneById(req, res));
 })
 
+router.post('/searchOrders',async function(req, res, next) {
+    await(orderController.searchOrders(req, res));
+})
 module.exports = router;
