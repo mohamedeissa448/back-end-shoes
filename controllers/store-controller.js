@@ -229,5 +229,67 @@ getOneById:(req,res)=>{
             else
                 return res.json({message : "No product is found"})        
         })
+    },
+    //reporting functions
+    getStorProductMatrix : (req,res)=>{
+        Store.aggregate( [
+            {
+                $lookup:
+                 {
+                   from: 'ogt_products',
+                   localField: 'Store_Product',
+                   foreignField: '_id',
+                   as: "Product"
+                 }
+            },
+            { $unwind : "$Product" },
+            {
+                $lookup:
+                 {
+                   from: 'lut_size_variants',
+                   localField: 'Size_Variant',
+                   foreignField: '_id',
+                   as: "Size"
+                 }
+            },
+            { $unwind : "$Size" },
+            {
+                $lookup:
+                 {
+                   from: 'lut_color_variants',
+                   localField: 'Color_Variant',
+                   foreignField: '_id',
+                   as: "Color"
+                 }
+            },
+            { $unwind : "$Color" },
+            {
+                $group: {
+                    _id: { 
+                    Product: "$Product.Product_Name",
+                    ProductID: "$Product.Product_Identifier",
+                    Color: "$Color",
+                        
+                    },
+                    Quantity: { $addToSet: {Quantity:"$Store_Quantity",Size: "$Size.Size_Name"} }
+                },
+            },
+            {
+                $group: {
+                    _id: {ProductName:"$_id.Product",
+                    ProductCode: "$_id.ProductID"},
+                    Colors: { $addToSet: { Color: "$_id.Color.Color_Name",ColorHexa: "$_id.Color.Color_HexaDecimalBasedValue",  Sizes:"$Quantity" } } 
+                    
+                },
+            },
+        ]).exec(function(err,data){
+            if(err)
+                return res.send(err);
+            else if(data.length > 0){
+                return res.json({products : data ,message : true});
+            } 
+            else
+                return res.json({message : "No product is found"})        
+        })
     }
 }
