@@ -868,10 +868,12 @@ module.exports={
         Order.findById(req.body._id)
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Customer_ShippingAddress Address"})
         .populate({path:"Order_ShippingCompany"})
-        .populate({path:"Order_Productss.Product"})
-        .populate({path:"Order_Productss.Size_Variant"})
-        .populate({path:"Order_Productss.Color_Variant"})
+        .populate({path:"Order_Products.Product"})
+        .populate({path:"Order_Products.Size_Variant"})
+        .populate({path:"Order_Products.Color_Variant"})
+        .populate({path:"Order_AffiliateSeller", select: "AffiliateSeller_Name AffiliateSeller_Phone"})
         .exec((err,order)=>{
+            console.log(order)
             if(err){
                 return res.send({
                     message:err

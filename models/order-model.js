@@ -25,7 +25,7 @@ var ReturnDetailsSchema= mongoose.Schema({
     },
     Return_Note                     : String,
     Return_ShippingCompanyRefNumber : String,// رقم المرتجع من شركة الشحن
-    Return_Product                 : ProductDecreaseSchema,
+    Return_Products                 : [ProductDecreaseSchema],
     Return_HandledBy                : {
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_users',
@@ -76,7 +76,7 @@ var OrderSchema =new mongoose.Schema({
         ref:'ogt_users',
         default : null
     },
-    Order_Products                             : ProductDecreaseSchema,
+    Order_Products                             : [ProductDecreaseSchema],
 
     Order_Status                                : String, // Created (quantity Is Pending), Assigned,  Shipped (Quantity is released form store), Cancelled (canceled before Shipped and quantitiy is removed from pending), Returned (), Collected
     Order_CancelationDetails                    : CancelationDetailsSchema,
