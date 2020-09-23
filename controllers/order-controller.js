@@ -603,7 +603,7 @@ module.exports={
         var updatedValue = {
             $set: {
                 Order_Status : req.body.Order_Status,
-                Order_CustomerPaymentStatus : req.body.Order_CustomerPaymentStatus
+                Order_PaymentBy : req.body.Order_PaymentBy
             }
         };
 
@@ -621,6 +621,13 @@ module.exports={
                             Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
                             Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
                             Order_RefrencedOrder: updatedOrderDocment._id
+                        } ,
+                        AffiliateSeller_FinancialTransactions : {
+                            AffiliateSellerFinancialTransaction_Date     : updatedOrderDocment.Order_Date ,
+                            AffiliateSellerFinancialTransaction_MathSign : 1 ,
+                            AffiliateSellerFinancialTransaction_Amount   : updatedOrderDocment.Order_AffiliateSellerRevenueAmount ,
+                            AffiliateSellerFinancialTransaction_Order    :  updatedOrderDocment.Order_AffiliateSeller ,
+                            AffiliateSellerFinancialTransaction_Type     :  "Payment"
                         }
                      }
                  };
@@ -826,6 +833,27 @@ module.exports={
     getMyShippedOrders:(req,res)=>{
         Order.find({ 
             Order_InvntoryHandlingAssignedTo : req.body.Order_InvntoryHandlingAssignedTo,
+            Order_Status                      : 'Shipped'
+        })
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})
+        .populate({path: 'Order_InvntoryHandlingAssignedTo' ,select: "User_Name"})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+    getAllShippedOrders:(req,res)=>{
+        Order.find({ 
             Order_Status                      : 'Shipped'
         })
         .populate({path:"Order_Customer",select:"Customer_Code Customer_Name"})

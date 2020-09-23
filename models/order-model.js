@@ -81,7 +81,10 @@ var OrderSchema =new mongoose.Schema({
     Order_Status                                : String, // Created (quantity Is Pending), Assigned,  Shipped (Quantity is released form store), Cancelled (canceled before Shipped and quantitiy is removed from pending), Returned (), Collected
     Order_CancelationDetails                    : CancelationDetailsSchema,
     Order_Return_Details                        : [ReturnDetailsSchema],
-
+    Order_PaymentBy                             :{
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "lut_payment_method"
+    }
 });
 
 Order = module.exports = mongoose.model('ogt_order',OrderSchema);

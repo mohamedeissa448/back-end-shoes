@@ -41,7 +41,7 @@ var AffiliateSellerFinancialTransactionSchema =new mongoose.Schema({
       default:    new Date(),
   },
   AffiliateSellerFinancialTransaction_Date                      : Date, // As Defined in the action
-  AffiliateSellerFinancialTransaction_MathSign                  : Number, // (-1 for Payments or returns) and (1 for Purchasing)
+  AffiliateSellerFinancialTransaction_MathSign                  : Number, // (-1 ?? for Payments or returns) and (1 for Purchasing)
   AffiliateSellerFinancialTransaction_Amount                    : Number ,
   AffiliateSellerFinancialTransaction_Order                     : { // for which order this transaction is related to
     type: mongoose.Schema.Types.ObjectId,

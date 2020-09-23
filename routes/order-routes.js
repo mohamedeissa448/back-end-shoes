@@ -82,6 +82,9 @@ router.get('/getOnlyAssignedOrders',async function(req, res, next) {
 router.post('/getMyShippedOrders',async function(req, res, next) {
     await(orderController.getMyShippedOrders(req, res));
 });
+router.get('/getAllShippedOrders',async function(req, res, next) {
+    await(orderController.getAllShippedOrders(req, res));
+});
 //get only orders assigned to a specific user
 router.post('/getUserOrders',async function(req, res, next) {
     await(orderController.getUserOrders(req, res));
