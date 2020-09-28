@@ -292,10 +292,11 @@ module.exports={
         })
     },
     /********         Orders              */
-    getAffiliateSellerCanceledOrders: (req,res)=>{
+    getAffiliateSellerCanceledOrdersFollowedUp: (req,res)=>{
       Order.find( { 
         Order_AffiliateSeller : req.body.Order_AffiliateSeller,
         Order_Status : 'Cancelled',
+        Order_CanBeFollowedUp : true
       })
       .populate({path:'Order_Customer',select :'Customer_Code Customer_Name'})
       .populate({path:'Order_CancelationDetails.Cancelation_ReasonOfCancelation'})
@@ -756,5 +757,65 @@ getFilteredCanceledOrdersByCustomerMobile :(req,res)=>{
         }
     });   
 },
+
+getAffiliateSellerTransactionsFromDateToDate : (req,res)=>{
+  AffiliateSeller.findById(req.body._id )
+    .select("AffiliateSeller_FinancialTransactions")
+    .populate({path : "AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Order",select:"Order_Code"})
+    .exec(function(err, seller){
+        if(err){
+            return res.json({
+                message:err
+            })
+        }else if(seller) {
+          let filteredTransactions = [];
+          seller.AffiliateSeller_FinancialTransactions.forEach((transaction)=>{
+            if((transaction.AffiliateSellerFinancialTransaction_Date).getTime() >= new Date(req.body.searchDate.Start_Date).getTime() && (transaction.AffiliateSellerFinancialTransaction_Date).getTime() <= new Date(req.body.searchDate.End_Date).getTime())
+            filteredTransactions.push(transaction)
+          });
+          
+            return res.send(filteredTransactions)
+        }else{
+            return res.json({
+                message:"seller is not found"
+            })
+        }
+    }); 
+},
+
+checkSellerBromoCodeValidation :(req,res)=>{
+  AffiliateSeller.findById(req.body.affiliateSellerId )
+    .select("AffiliateSeller_BromoCodes_Used")
+    .exec(function(err, seller){
+        if(err){
+            return res.json({
+                message:err
+            })
+        }else if(seller) {
+          let bromoCodeIsFound = false ;
+          let bromoCodeCanBeUsed = false ;
+          seller.AffiliateSeller_BromoCodes_Used.forEach((bromCode)=>{
+            if( bromCode._id == req.body.BromoCodeId){
+              bromoCodeIsFound = true ;
+              if(bromCode.Used_Number_Of_Times < req.body.BromoCode_Usage_Times){
+                // it means seller can still use this bromoCode
+                bromoCodeCanBeUsed = true
+              }
+            }
+          });
+          if(bromoCodeIsFound && bromoCodeCanBeUsed )
+            return res.send({message : true})
+          else if(!bromoCodeIsFound)
+            return res.send({message : true})
+          else
+          return res.send({message : false})
+
+        }else{
+            return res.json({
+                message:"seller is not found"
+            })
+        }
+    }); 
+}
    
 }

@@ -3,7 +3,8 @@ var mongoose = require('mongoose');
 var reasonOfCalcelationSchema = mongoose.Schema({
     
     ReasonOfCalcelation_Name     	       : String,
-    ReasonOfCalcelation_Description         : String,
+    ReasonOfCalcelation_Description        : String,
+    ReasonOfCalcelation_CanBeFollowedUp    :Boolean,
     ReasonOfCalcelation_IsActive            : {
         type:Boolean,
         default:true,

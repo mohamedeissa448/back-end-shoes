@@ -41,4 +41,8 @@ router.post('/searchProductInStore',async function(req, res, next) {
 router.get('/getStorProductMatrix',async function(req, res, next) {
     await(storeController.getStorProductMatrix(req, res));
 });
+
+router.get('/getAllProductsInStore',async function(req, res, next) {
+    await(storeController.getAllProductsInStore(req, res));
+});
 module.exports = router;

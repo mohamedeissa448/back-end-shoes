@@ -108,4 +108,42 @@ module.exports={
 
         })
     },
+
+    getAllSupplierPayments : (req,res)=>{
+        SupplierPayment.find({ SupplierPayment_Supplier : req.body['_id'] })
+        .populate({path:"SupplierPayment_DoneBy_User"})
+        .populate({path:"SupplierPayment_PaymentMethod"})
+        .exec((err,payments)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else  {
+                return res.send(payments)
+            }
+
+        })
+    },
+
+    getAllSupplierPaymentsFromDateToDate : (req,res)=>{
+        SupplierPayment.find({ 
+            SupplierPayment_Supplier : req.body['_id'] ,
+            SupplierPayment_Date     : {
+                $gte  : req.body.searchDate.Start_Date,
+                $lte  : req.body.searchDate.End_Date
+            }
+        })
+        .populate({path:"SupplierPayment_DoneBy_User"})
+        .populate({path:"SupplierPayment_PaymentMethod"})
+        .exec((err,payments)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else  {
+                return res.send(payments)
+            }
+
+        })
+    },
 }

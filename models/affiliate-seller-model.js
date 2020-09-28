@@ -49,6 +49,14 @@ var AffiliateSellerFinancialTransactionSchema =new mongoose.Schema({
   },
   AffiliateSellerFinancialTransaction_Type                      : String, // order, return, Payment
 });
+var AffiliateSellerBromoCodesUsedSchema = new mongoose.Schema({
+  BromCode_ID : {
+    type: mongoose.Schema.Types.ObjectId,
+    ref :"ogt_bromoCode"
+  },
+  Used_Number_Of_Times : Number   //عدد مرات الاستخدام للبروموكود لهذا المسوق
+});
+
 var AffiliateSellerSchema = mongoose.Schema(
   {
     AffiliateSeller_Code                        : Number,
@@ -110,6 +118,7 @@ var AffiliateSellerSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref:'ogt_users'
     },
+    AffiliateSeller_BromoCodes_Used : [AffiliateSellerBromoCodesUsedSchema],
     AffiliateSeller_IsActive: {
       type: Boolean,
       default: true

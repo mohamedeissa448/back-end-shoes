@@ -80,6 +80,10 @@ var OrderSchema =new mongoose.Schema({
 
     Order_Status                                : String, // Created (quantity Is Pending), Assigned,  Shipped (Quantity is released form store), Cancelled (canceled before Shipped and quantitiy is removed from pending), Returned (), Collected
     Order_CancelationDetails                    : CancelationDetailsSchema,
+    Order_CanBeFollowedUp                       : {
+        type : Boolean,
+        default : false
+    },
     Order_Return_Details                        : [ReturnDetailsSchema],
     Order_PaymentBy                             :{
         type : mongoose.Schema.Types.ObjectId,

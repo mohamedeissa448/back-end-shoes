@@ -106,4 +106,16 @@ router.post('/getOneById',async function(req, res, next) {
 router.post('/searchOrders',async function(req, res, next) {
     await(orderController.searchOrders(req, res));
 })
+
+router.post('/getOrdersByDateFromTo',async function(req, res, next) {
+    await(orderController.getOrdersByDateFromTo(req, res));
+})
+
+router.post('/unFollowOrder',async function(req, res, next) {
+    await(orderController.unFollowOrder(req, res));
+})
+
+router.post('/RecreateOrder',async function(req, res, next) {
+    await(orderController.RecreateOrder(req, res));
+})
 module.exports = router;

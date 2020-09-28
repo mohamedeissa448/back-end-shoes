@@ -29,6 +29,8 @@ var productTransactionRouter = require ("./routes/product-transaction-route");
 var shippingCompaniesRouter = require("./routes/shipping-company-routes");
 var affiliateSellersRouter = require("./routes/affiliate-Seller-routes");
 var ordersRouter = require("./routes/order-routes");
+var bromoCodeRouter = require("./routes/bromo-code-route");
+
 var app = express();
 
 // view engine setup
@@ -47,7 +49,7 @@ app.use(passport.session());
 //connect to DB
 //mongoose.connect(process.env.OgatDBConnection, { useNewUrlParser: true,useUnifiedTopology:true })
 mongoose.connect("mongodb://localhost:27017/fashion", { useNewUrlParser: true,useUnifiedTopology:true })
-.then(()=>console.log("connected to DB"))
+.then((db)=>console.log("connected to DB"))
 .catch(()=>console.log("Couldn't connect to DB"))
 
 app.use('/', indexRouter);
@@ -69,6 +71,8 @@ app.use('/productTransaction', productTransactionRouter);
 app.use('/shippingCompanies', shippingCompaniesRouter);
 app.use('/affiliateSellers', affiliateSellersRouter);
 app.use('/orders', ordersRouter);
+app.use('/bromoCode', bromoCodeRouter);
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

@@ -108,4 +108,34 @@ getOneById:(req,res)=>{
 
     })
 },
+
+ searchProductTransactionsFromDateToDate : (req,res) => {
+    ProductTransaction.find({
+        ProductTransaction_Product : req.body['_id'] ,
+        ProductTransaction_Date    : {
+            $gte : req.body.searchDate.Start_Date ,
+            $lte : req.body.searchDate.End_Date
+        }
+    })
+    .populate({path:"ProductTransaction_Product", select:"Product_Name"})
+    .populate({path:"ProductTransaction_Size_Variant", select:"Size_Name"})
+    .populate({path:"ProductTransaction_Color_Variant", select:"Color_Name"})
+    .populate({path:"ProductTransaction_IncreaseInventory" ,select : "IncreaseInventory_Code"})
+    .populate({path:"ProductTransaction_DecreaseInventory" ,select : "DecreaseInventory_Code"})
+
+    .exec((err,productTransaction)=>{
+        if(err){
+            return res.send({
+                message:err
+            })
+        }else if(productTransaction) {
+            return res.send(productTransaction)
+        }else{
+            return res.send({
+                message:"productTransaction is null"
+            })
+        }
+
+    })
+ }
 }

@@ -20,4 +20,7 @@ router.post('/getOneById',async function(req, res, next) {
     await(productTransactionController.getOneById(req, res));
 });
 
+router.post('/searchProductTransactionsFromDateToDate',async function(req, res, next) {
+    await(productTransactionController.searchProductTransactionsFromDateToDate(req, res));
+});
 module.exports = router;

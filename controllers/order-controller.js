@@ -1,6 +1,7 @@
 var Order=require("../models/order-model");
 var AffiliateSeller=require("../models/affiliate-seller-model");
-var Store = require("../models/store-model")
+var Store = require("../models/store-model");
+var Customer = require("../models/customer-model")
 module.exports={
     addAffiliateSellerOrder:(req,res)=>{
         AffiliateSeller.findById(req.body.Order_AffiliateSeller)
@@ -45,6 +46,25 @@ module.exports={
                                 Order_AffiliateSellerRevenueAmount: document.Order_AffiliateSellerRevenueAmount,
                                 Order_RefrencedOrder: document._id
                             });
+                            //we need to add bromCode if existed in request body
+                            if(req.body.chosedBromoCode){
+                                let BromCodeIsFound = false
+                                seller.AffiliateSeller_BromoCodes_Used.forEach((bromoCode)=>{
+                                    if(req.body.chosedBromoCode._id == bromoCode.BromCode_ID){
+                                        //increment number of used times by 1
+                                        bromoCode.Used_Number_Of_Times ++ ;
+                                        BromCodeIsFound = true;
+                                    }
+                                });
+                                if(!BromCodeIsFound){
+                                    //we need to push object to the array
+                                    seller.AffiliateSeller_BromoCodes_Used.push({
+                                        BromCode_ID          : req.body.chosedBromoCode._id ,
+                                        Used_Number_Of_Times : 1
+                                    })
+                                }
+                            }
+                           
                             seller.save(function(err,affiliateSellerUpdatedDocument){
                                 if(err){
                                     return res.send({
@@ -76,8 +96,19 @@ module.exports={
                                                 count ++ ;
                                                 console.log("5")
                                                 if(count == req.body.Order_Products.length){
-                                                    console.log("6")                                                    
-                                                    return res.send({message : true})
+                                                    console.log("6")    
+                                                    //we need to increment Customer_Num_Of_Orders by one in customer model
+                                                    let updated = {
+                                                        $inc : {
+                                                            Customer_Num_Of_Orders : 1
+                                                        }
+                                                    }
+                                                    Customer.findByIdAndUpdate(req.body.Order_Customer,updated) 
+                                                    .exec(function(err,customerDoc){
+                                                        if(err) return res.send({message : err})
+                                                        else return res.send({message : true})
+                                                    })                                               
+                                                    
                                                 }
                                             }
                                         })
@@ -525,7 +556,8 @@ module.exports={
         var updatedValue = {
             $set: {
                 Order_Status : req.body.Order_Status,
-                Order_CancelationDetails : req.body.Order_CancelationDetails
+                Order_CancelationDetails : req.body.Order_CancelationDetails,
+                Order_CanBeFollowedUp    : req.body.Order_CanBeFollowedUp
             }
         };
 
@@ -1262,5 +1294,80 @@ module.exports={
     },
         
     
+    getOrdersByDateFromTo : (req,res)=>{
+        Order.find({ Order_Date : {
+            $gte : req.body.searchDate.Start_Date,
+            $lte : req.body.searchDate.End_Date
+            } 
+        })
+        .select("Order_AffiliateSeller Order_Status Order_InvntoryHandlingAssignedTo")
+        .populate({path:"Order_AffiliateSeller",select:"AffiliateSeller_Name  AffiliateSeller_Code"})
+        .populate({path:"Order_InvntoryHandlingAssignedTo",select:"User_Name "})
+        .exec((err,orders)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(orders) {
+                return res.send(orders)
+            }else{
+                return res.send({
+                    message:"orders are null"
+                })
+            }
+
+        })
+    },
+    //affiliate seller click on  unFollowOrder button 
+    unFollowOrder:(req,res)=>{
+        let updated = {
+            $set : {
+                Order_CanBeFollowedUp : false
+            }
+        }
+        Order.findByIdAndUpdate(req.body[_id],updated,{upsert:true},{new:true})
+        .exec((err,order)=>{
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(order) {
+                return res.send({message : true})
+            }else{
+                return res.send({
+                    message:"order are null"
+                })
+            }
+
+        })
+    },
+    //affiliate seller click on  RecreateOrder button 
+
+    RecreateOrder:(req,res)=>{
+        let updated = [
+          { $set : {
+                Order_Status : "Created",
+                Order_InvntoryHandlingAssignedTo : null,
+                Order_Note  : { $concat: [ "$Order_Note", req.body.Recreate_Order_Note]}
+            }
+        }
+        ]
+        Order.findByIdAndUpdate(req.body._id,updated,function(err,order){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(order) {
+                return res.send({message : true})
+            }else{
+                return res.send({
+                    message:"order are null"
+                })
+            }
+        })
+            
+
+        
+    }
        
 }

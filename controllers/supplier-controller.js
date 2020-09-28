@@ -180,5 +180,25 @@ module.exports={
                 res.send("not Supplier");
               }
         })
+    },
+    /************** Supplier Transactions */
+    getAllSupplierTransactions : (req,res) => {
+        Supplier.findById( req.body._id)
+      .select("Supplier_FinancialTransaction")
+      .populate({path : "Supplier_FinancialTransaction.SupplierFinancialTransaction_Bill",select :"Bill_Code"})
+      .populate({path : "Supplier_FinancialTransaction.SupplierFinancialTransaction_BillReturn",select :"BillReturn_Code"})
+      .populate({path : "Supplier_FinancialTransaction.SupplierFinancialTransaction_Payment",select :"SupplierPayment_Date"})
+      .exec(function(err, supplier) {
+        if (err) {
+          return res.send({
+            message: err
+          });
+        } else if (supplier) {
+          res.send(supplier);
+        } else {
+          res.send("not Supplier");
+        }
+      });
+
     }
 }

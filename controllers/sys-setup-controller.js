@@ -964,6 +964,7 @@ module.exports={
         const newReason=new CancelReason();
         newReason.ReasonOfCalcelation_Name=req.body.ReasonOfCalcelation_Name;
         newReason.ReasonOfCalcelation_Description=req.body.ReasonOfCalcelation_Description;
+        newReason.ReasonOfCalcelation_CanBeFollowedUp = req.body.ReasonOfCalcelation_CanBeFollowedUp
         newReason.save((err,document)=>{
             if(err){
                 return res.send({
@@ -982,6 +983,7 @@ module.exports={
         updatedReason.ReasonOfCalcelation_Name=req.body.ReasonOfCalcelation_Name;
         updatedReason.ReasonOfCalcelation_Description=req.body.ReasonOfCalcelation_Description;
         updatedReason.ReasonOfCalcelation_IsActive=req.body.ReasonOfCalcelation_IsActive;
+        updatedReason.ReasonOfCalcelation_CanBeFollowedUp = req.body.ReasonOfCalcelation_CanBeFollowedUp
 
         CancelReason.findByIdAndUpdate(req.body['_id'],updatedReason,{new: true},
             (err,reason)=>{

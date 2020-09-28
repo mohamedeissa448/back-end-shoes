@@ -17,6 +17,13 @@ router.get('/getAll',async function(req, res, next) {
 router.post('/getOneById',async function(req, res, next) {
     await(supplierPaymentsController.getOneById(req, res));
 });
-
+//get all payments for a specific supplier
+router.post('/getAllSupplierPayments',async function(req, res, next) {
+    await(supplierPaymentsController.getAllSupplierPayments(req, res));
+});
+//get all payments for a specific supplier from a date to a date
+router.post('/getAllSupplierPaymentsFromDateToDate',async function(req, res, next) {
+    await(supplierPaymentsController.getAllSupplierPaymentsFromDateToDate(req, res));
+});
 
 module.exports = router;

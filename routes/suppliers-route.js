@@ -28,5 +28,8 @@ router.post('/getSupplierContactsByID',async function(req, res, next) {
 router.post('/addContactsToSupplierBySupplierId',async function(req, res, next) {
     await(supplierController.addContactsToSupplierBySupplierId(req, res));
 });
-
+/***************  Transactions**********  */
+router.post('/getAllSupplierTransactions',async function(req, res, next) {
+    await(supplierController.getAllSupplierTransactions(req, res));
+});
 module.exports = router;

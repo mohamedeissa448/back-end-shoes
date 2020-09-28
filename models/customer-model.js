@@ -26,7 +26,11 @@ var CustomerSchema = mongoose.Schema({
          },
          Address          : AddressSchema
     }],
-    Customer_Status               : Number // 1 = active , 0 = disactive , 2 = blocked
+    Customer_Status               : Number ,// 1 = active , 0 = Risky , 2 = blocked
+    Customer_Num_Of_Orders :  {
+        type : Number ,
+        default : 0
+    }
     
 });
 

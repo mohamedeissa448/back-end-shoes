@@ -44,6 +44,11 @@ router.post('/getAffiliateSellerPaymentsFromDateTo',async function(req, res, nex
 router.post('/addPaymentsToAffiliateSellerByAffiliateSellerId',async function(req, res, next) {
     await(affiliateSellerController.addPaymentsToAffiliateSellerByAffiliateSellerId(req, res));
 });
+/************************AffiliateSeller financial transactions */
+router.post('/getAffiliateSellerTransactionsFromDateToDate',async function(req, res, next) {
+    await(affiliateSellerController.getAffiliateSellerTransactionsFromDateToDate(req, res));
+});
+
 /********************    log In      */
 router.post("/login",async function(req, res, next) {
     console.log("req.user", req.user);
@@ -94,8 +99,8 @@ router.post("/login",async function(req, res, next) {
 });
 /////////affiliate seller orders ///////
 
-router.post("/getAffiliateSellerCanceledOrders",async function(req, res) {
-    await(affiliateSellerController.getAffiliateSellerCanceledOrders(req, res));
+router.post("/getAffiliateSellerCanceledOrdersFollowedUp",async function(req, res) {
+    await(affiliateSellerController.getAffiliateSellerCanceledOrdersFollowedUp(req, res));
 });
 router.post("/getAffiliateSellerCanceledOrdersByDateFromTO",async function(req, res) {
     await(affiliateSellerController.getAffiliateSellerCanceledOrdersByDateFromTO(req, res));
@@ -112,7 +117,9 @@ router.post("/getAffiliateSellerReturnedOrdersByDateFromTO",async function(req, 
 router.post("/getFilteredReturnedOrdersByCustomerMobile",async function(req, res) {
     await(affiliateSellerController.getFilteredReturnedOrdersByCustomerMobile(req, res));
 });
-
+router.post("/checkSellerBromoCodeValidation",async function(req, res) {
+    await(affiliateSellerController.checkSellerBromoCodeValidation(req, res));
+});
 /********** for  Statistics    */
 router.post('/getCountOfCanceledOrdersByAffiliateSellerId',async function(req, res, next) {
     await(affiliateSellerController.getCountOfCanceledOrdersByAffiliateSellerId(req, res));

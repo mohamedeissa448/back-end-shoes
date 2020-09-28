@@ -1,4 +1,5 @@
 var Customer=require("../models/customer-model");
+var Order =require("../models/order-model");
 
 module.exports={
     addCustomer:(req,res)=>{
@@ -217,5 +218,151 @@ module.exports={
                     res.send("not customer");
                   }
             })
+        },
+    
+    changeCustomerStatus : (req,res)=>{
+      let updatedCustomer={};
+        updatedCustomer.Customer_Status=req.body.Customer_Status
+        var newvalues={
+            $set:updatedCustomer
         }
+            Customer.findByIdAndUpdate(req.body['_id'],newvalues,{new: true},
+            (err,customer)=>{
+                if(err){
+                    return res.send({
+                        message:err
+                    })
+                }else if(customer) {
+                    return res.send({
+                        message:true,
+                        data:{ newCustomer:customer }
+                    })
+                }else{
+                    return res.send({
+                        message:"updated Customer is null"
+                    })
+                }
+            })
+    } ,
+    
+    getAllOrdersForAspecificCustomer : (req,res)=>{
+      Order.find({ Order_Customer : req.body.customerId })
+      .populate({path:"Order_Customer",select:"Customer_Code Customer_Name Customer_ShippingAddress Address"})
+        .populate({path:"Order_ShippingCompany"})
+        .populate({path:"Order_Products.Product"})
+        .populate({path:"Order_Products.Size_Variant"})
+        .populate({path:"Order_Products.Color_Variant"})
+        .populate({path:"Order_AffiliateSeller", select: "AffiliateSeller_Name AffiliateSeller_Phone"})
+      .exec((err,orders)=>{
+        if(err) return res.json({ message :err })
+        else  (orders)
+          res.json({message : true ,orders : orders})
+      })
+    } ,
+
+    /************* reports */
+    getNumOfAllCustomers : (req,res)=>{
+      Customer.find()
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message: false
+              })
+          }else  {
+              return res.json({ count:count ,message : true })
+          }
+      });   
+    },
+
+    getNumOfAllActiveCustomers : (req,res)=>{
+      Customer.find( { Customer_Status : 1 })
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message: false
+              })
+          }else  {
+              return res.json({ count:count ,message : true })
+          }
+      });   
+    } ,
+
+    getNumOfAllRiskyCustomers : (req,res)=>{
+      Customer.find( { Customer_Status : 0 })
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:false
+              })
+          }else {
+              return res.json({ count:count ,message : true })
+          }
+      });   
+    } ,
+
+    getNumOfAllBlockedCustomers : (req,res)=>{
+      Customer.find( { Customer_Status : 2 })
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:false
+              })
+          }else  {
+              return res.json({ count:count ,message : true })
+          }
+      });   
+    } ,
+
+    /*********second report */
+
+    getNumOfAllCustomersWithOnlyOneOrder  : (req,res) => {
+      Customer.find( { Customer_Num_Of_Orders : 1 })
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:false
+              })
+          }else  {
+              return res.json({ count:count ,message : true })
+          }
+      });   
+    },
+    getNumOfAllCustomersWithOnlyTwoOrders : (req,res) => {
+        Customer.find( { Customer_Num_Of_Orders : 2 })
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:false
+              })
+          }else  {
+              return res.json({ count:count ,message : true })
+          }
+      });  
+    },
+    getNumOfAllCustomersWithThreeOrdersOrMore: (req,res) => {
+        Customer.find( { Customer_Num_Of_Orders : { $gte: 3 } })
+      .countDocuments(function(err, count){
+          if(err){
+              return res.json({
+                  message:false
+              })
+          }else  {
+              return res.json({ count:count ,message : true })
+          }
+      });  
+    },
+
+    /************ third report  */
+    getCustomerNamesWithAspecificNumOfOrders : (req,res)=>{
+        Customer.find( { Customer_Num_Of_Orders : req.body.NumberOfOrders })
+        .exec(function(err, customers){
+            if(err){
+                return res.json({
+                    message:false
+                })
+            }else  {
+                return res.json({ customers:customers ,message : true })
+            }
+        }); 
+    }
 }

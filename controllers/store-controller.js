@@ -291,5 +291,16 @@ getOneById:(req,res)=>{
             else
                 return res.json({message : "No product is found"})        
         })
+    },
+
+
+    getAllProductsInStore : (req,res) =>{
+        Store.find({})
+        .select("Store_Quantity Store_Cost")
+        .exec(function(err,storeProducts){
+            if(err) return res.json({message : err})
+            else
+            return res.send(storeProducts)
+        })
     }
 }
