@@ -32,4 +32,7 @@ router.post('/addContactsToSupplierBySupplierId',async function(req, res, next) 
 router.post('/getAllSupplierTransactions',async function(req, res, next) {
     await(supplierController.getAllSupplierTransactions(req, res));
 });
+router.post('/deleteTransactionFromFinancialTransactions',async function(req, res, next) {
+    await(supplierController.deleteTransactionFromFinancialTransactions(req, res));
+});
 module.exports = router;

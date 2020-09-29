@@ -224,11 +224,12 @@ module.exports={
     })
     },
     /***********************affiliate seller Payments */
+    //get AffiliateSeller_PaymentLog
     getAffiliateSellerPaymentsByID:(req,res)=>{
         AffiliateSeller.findById( req.body._id)
       .select("AffiliateSeller_PaymentLog")
       .populate({path:"AffiliateSeller_PaymentLog.Payment_PaidMethod",select:"PaymentMethod_Name"})
-      .populate({path:"AffiliateSeller_PaymentLog.Payment_PaidByUser",select:"User_DisplayName"})
+      .populate({path:"AffiliateSeller_PaymentLog.Payment_PaidByUser",select:"User_Name"})
       .exec(function(err, seller) {
         if (err) {
           return res.send({
@@ -269,28 +270,115 @@ module.exports={
       }
     });
   },
-
-    addPaymentsToAffiliateSellerByAffiliateSellerId:(req,res)=>{
+//add a single object to the arrays AffiliateSeller_PaymentLog and AffiliateSeller_FinancialTransactions
+  addPaymentRecordToAffiliateSellerByAffiliateSellerId:(req,res)=>{
         let newValues={
-            $set:{
-            AffiliateSeller_PaymentLog:req.body.AffiliateSeller_PaymentLog
+            $push:{
+            AffiliateSeller_PaymentLog            : req.body.paymentRecord ,
+            AffiliateSeller_FinancialTransactions : req.body.financialTransactionRecord 
             }
         }
-        AffiliateSeller.findByIdAndUpdate(req.body._id,newValues,{upsert:true},function(err,seller){
+        AffiliateSeller.findByIdAndUpdate(req.body.affiliateSellerId,newValues,{upsert:true},function(err,seller){
             if (err) {
                 return res.send({
                   message: err
                 });
               } else if (seller) {
                 res.json({
-                  message:true,
-                  data:{ seller:seller }
+                  message:true
               });
               } else {
                 res.send("not seller");
               }
         })
     },
+//delete single object from the array AffiliateSeller_PaymentLog
+    deleteRecordFromPaymentsLog : (req,res)=>{
+      AffiliateSeller.findById( req.body.AffiliateSellerId)
+      .select("AffiliateSeller_PaymentLog")
+      .exec(function(err, seller) {
+        if (err) {
+          return res.send({
+            message: err
+          });
+        } else if (seller) {
+          let isFound = false;
+          let foundedObject ={}
+          seller.AffiliateSeller_PaymentLog.forEach((payment,index)=>{
+            if (  req.body.paymentID == payment._id.toString() ){
+              isFound = true
+              foundedObject = payment
+            }
+          });
+          if(isFound)
+            seller.AffiliateSeller_PaymentLog.splice(seller.AffiliateSeller_PaymentLog.indexOf(foundedObject),1)
+            
+          console.log("seller.AffiliateSeller_PaymentLog",seller.AffiliateSeller_PaymentLog)
+          let updated = {$set :{ AffiliateSeller_PaymentLog : seller.AffiliateSeller_PaymentLog }}
+          AffiliateSeller.findByIdAndUpdate( req.body.AffiliateSellerId,updated  
+          ,function(err,updatedDocument){
+            if(err) return res.send({message : err});
+            else
+            return res.json({message : true});
+          })
+        } else {
+          res.send("not seller");
+        }
+      });
+    },
+
+    //delete single object from the array AffiliateSeller_FinancialTransactions
+    deleteTransactionFromFinancialTransactions : (req,res)=>{
+      AffiliateSeller.findById( req.body.AffiliateSellerId)
+      .select("AffiliateSeller_FinancialTransactions")
+      .exec(function(err, seller) {
+        if (err) {
+          return res.send({
+            message: err
+          });
+        } else if (seller) {
+          let isFound = false;
+          let foundedObject ={}
+          seller.AffiliateSeller_FinancialTransactions.forEach((transaction,index)=>{
+            if (  req.body.transactionID == transaction._id.toString() ){
+              isFound = true
+              foundedObject = transaction
+            }
+          });
+          if(isFound)
+            seller.AffiliateSeller_FinancialTransactions.splice(seller.AffiliateSeller_FinancialTransactions.indexOf(foundedObject),1)
+            
+          console.log("seller.AffiliateSeller_FinancialTransactions",seller.AffiliateSeller_FinancialTransactions)
+          let updated = {$set :{ AffiliateSeller_FinancialTransactions : seller.AffiliateSeller_FinancialTransactions }}
+          AffiliateSeller.findByIdAndUpdate( req.body.AffiliateSellerId,updated  
+          ,function(err,updatedDocument){
+            if(err) return res.send({message : err});
+            else
+            return res.json({message : true});
+          })
+        } else {
+          res.send("not seller");
+        }
+      });
+    },
+
+    //get AffiliateSeller_FinancialTransactions
+    getAffiliateSellerFinancialTransactionsByID:(req,res)=>{
+      AffiliateSeller.findById( req.body._id)
+    .select("AffiliateSeller_FinancialTransactions")
+    .populate({path:"AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Order",select:"Order_Code"})
+    .exec(function(err, seller) {
+      if (err) {
+        return res.send({
+          message: err
+        });
+      } else if (seller) {
+        res.send(seller);
+      } else {
+        res.send("not seller");
+      }
+    });
+  },
     /********         Orders              */
     getAffiliateSellerCanceledOrdersFollowedUp: (req,res)=>{
       Order.find( { 

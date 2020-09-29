@@ -200,5 +200,41 @@ module.exports={
         }
       });
 
-    }
+    },
+
+    //delete single object from the array Supplier_FinancialTransaction
+    deleteTransactionFromFinancialTransactions : (req,res)=>{
+        Supplier.findById( req.body.SupplierId)
+        .select("Supplier_FinancialTransaction")
+        .exec(function(err, supplier) {
+          if (err) {
+            return res.send({
+              message: err
+            });
+          } else if (supplier) {
+            let isFound = false;
+            let foundedObject ={}
+            supplier.Supplier_FinancialTransaction.forEach((transaction,index)=>{
+              if (  req.body.transactionID == transaction._id.toString() ){
+                isFound = true
+                foundedObject = transaction
+              }
+            });
+            if(isFound)
+              supplier.Supplier_FinancialTransaction.splice(supplier.Supplier_FinancialTransaction.indexOf(foundedObject),1)
+              
+            console.log("supplier.Supplier_FinancialTransaction",supplier.Supplier_FinancialTransaction)
+            let updated = {$set :{ Supplier_FinancialTransaction : supplier.Supplier_FinancialTransaction }}
+            Supplier.findByIdAndUpdate( req.body.SupplierId,updated  
+            ,function(err,updatedDocument){
+              if(err) return res.send({message : err});
+              else
+              return res.json({message : true});
+            })
+          } else {
+            res.send("not supplier");
+          }
+        });
+      },
+  
 }

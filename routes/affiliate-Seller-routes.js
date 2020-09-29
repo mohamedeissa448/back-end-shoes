@@ -41,14 +41,23 @@ router.post('/getAffiliateSellerPaymentsByID',async function(req, res, next) {
 router.post('/getAffiliateSellerPaymentsFromDateTo',async function(req, res, next) {
     await(affiliateSellerController.getAffiliateSellerPaymentsFromDateTo(req, res));
 });
-router.post('/addPaymentsToAffiliateSellerByAffiliateSellerId',async function(req, res, next) {
-    await(affiliateSellerController.addPaymentsToAffiliateSellerByAffiliateSellerId(req, res));
+router.post('/addPaymentRecordToAffiliateSellerByAffiliateSellerId',async function(req, res, next) {
+    await(affiliateSellerController.addPaymentRecordToAffiliateSellerByAffiliateSellerId(req, res));
 });
+router.post('/deleteRecordFromPaymentsLog',async function(req, res, next) {
+    await(affiliateSellerController.deleteRecordFromPaymentsLog(req, res));
+});
+
 /************************AffiliateSeller financial transactions */
 router.post('/getAffiliateSellerTransactionsFromDateToDate',async function(req, res, next) {
     await(affiliateSellerController.getAffiliateSellerTransactionsFromDateToDate(req, res));
 });
-
+router.post('/deleteTransactionFromFinancialTransactions',async function(req, res, next) {
+    await(affiliateSellerController.deleteTransactionFromFinancialTransactions(req, res));
+});
+router.post('/getAffiliateSellerFinancialTransactionsByID',async function(req, res, next) {
+    await(affiliateSellerController.getAffiliateSellerFinancialTransactionsByID(req, res));
+});
 /********************    log In      */
 router.post("/login",async function(req, res, next) {
     console.log("req.user", req.user);

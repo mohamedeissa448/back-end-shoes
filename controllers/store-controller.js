@@ -302,5 +302,31 @@ getOneById:(req,res)=>{
             else
             return res.send(storeProducts)
         })
+    },
+
+    GetAllProductsfromStoreOfSelectedCategory: (req,res)=>{
+        Product.find({ Product_Categories : { "$in" : req.body.categoryID} })
+        .select("Product_Categories")
+        .exec(function(err,productsDocuments){
+            if(err) return res.send({ message1 :err })
+            else if(productsDocuments.length > 0){
+                //collect the ids of productsDocuments
+                let allproductsDocumentsIDs = [];
+                productsDocuments.forEach((product)=>{
+                    allproductsDocumentsIDs.push(product._id);
+                });
+                Store.find({ Store_Product : { "$in" : allproductsDocumentsIDs } })
+                .select("Store_Quantity Store_Cost")
+                .exec(function(err,storeProducts){
+                    if(err) return res.json({message2 : err})
+                    else
+                    return res.send(storeProducts)
+                })
+            }
+            else{
+                return res.send({ message : "no products is specified from the categoryID in req.body "})
+            }
+
+        })
     }
 }
