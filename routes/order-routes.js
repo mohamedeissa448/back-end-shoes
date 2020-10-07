@@ -106,7 +106,9 @@ router.post('/getOneById',async function(req, res, next) {
 router.post('/searchOrders',async function(req, res, next) {
     await(orderController.searchOrders(req, res));
 })
-
+router.post('/searchOrdersByWaybill',async function(req, res, next) {
+    await(orderController.searchOrdersByWaybill(req, res));
+})
 router.post('/getOrdersByDateFromTo',async function(req, res, next) {
     await(orderController.getOrdersByDateFromTo(req, res));
 })

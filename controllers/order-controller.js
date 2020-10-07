@@ -1,7 +1,8 @@
 var Order=require("../models/order-model");
 var AffiliateSeller=require("../models/affiliate-seller-model");
 var Store = require("../models/store-model");
-var Customer = require("../models/customer-model")
+var Customer = require("../models/customer-model");
+var ProductTransaction = require("../models/product-transaction-model");
 module.exports={
     addAffiliateSellerOrder:(req,res)=>{
         AffiliateSeller.findById(req.body.Order_AffiliateSeller)
@@ -632,56 +633,70 @@ module.exports={
         
     },
     collectOrder: (req,res)=>{
-        var updatedValue = {
-            $set: {
-                Order_Status : req.body.Order_Status,
-                Order_PaymentBy : req.body.Order_PaymentBy
-            }
-        };
-
-        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
+        Order.findById(req.body._id,function(err,OrderToUpdateDocment){
             if(err){
                 return res.send({
                     message:err
                 });
-            }else if(updatedOrderDocment) {
-                //we need to add this order to AffiliateSeller_DeliveredOrders property of affiliate seller model
-                 let updated ={
-                     $push :{
-                        AffiliateSeller_DeliveredOrders : {
-                            Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
-                            Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
-                            Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
-                            Order_RefrencedOrder: updatedOrderDocment._id
-                        } ,
-                        AffiliateSeller_FinancialTransactions : {
-                            AffiliateSellerFinancialTransaction_Date     : updatedOrderDocment.Order_Date ,
-                            AffiliateSellerFinancialTransaction_MathSign : 1 ,
-                            AffiliateSellerFinancialTransaction_Amount   : updatedOrderDocment.Order_AffiliateSellerRevenueAmount ,
-                            AffiliateSellerFinancialTransaction_Order    :  updatedOrderDocment.Order_AffiliateSeller ,
-                            AffiliateSellerFinancialTransaction_Type     :  "Payment"
-                        }
-                     }
-                 };
-                 AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
-                 .exec(function(err,updatedSellerDocument){
+            }else if(OrderToUpdateDocment) {
+                
+                
+                let AffiliateRevenueAmount = req.body.CollectedAmount * OrderToUpdateDocment.Order_AffiliateSellerRevenuePercentage / 100;
+                if(OrderToUpdateDocment.Order_Status =='Collected'){
+                    OrderToUpdateDocment.Order_AffiliateSellerRevenueAmount += AffiliateRevenueAmount;
+                }
+                else{
+                    OrderToUpdateDocment.Order_AffiliateSellerRevenueAmount = AffiliateRevenueAmount
+                }
+                
+                OrderToUpdateDocment.Order_Status = req.body.Order_Status;
+                OrderToUpdateDocment.Order_PaymentBy = req.body.Order_PaymentBy;
+                OrderToUpdateDocment.save(function(err,updatedOrderDocment){
                     if(err){
+                        
                         return res.send({
                             message:err
                         });
-                    }else if(updatedSellerDocument) {
-                        return res.send({ message : true });
+                    }else if(updatedOrderDocment) {
+
+                        //we need to add this order to AffiliateSeller_DeliveredOrders property of affiliate seller model
+                        let updated ={
+                            $push :{
+                                AffiliateSeller_DeliveredOrders : {
+                                    Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
+                                    Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                                    Order_AffiliateSellerRevenueAmount: AffiliateRevenueAmount,
+                                    Order_RefrencedOrder: updatedOrderDocment._id
+                                } ,
+                                AffiliateSeller_FinancialTransactions : {
+                                    AffiliateSellerFinancialTransaction_Date     : updatedOrderDocment.Order_Date ,
+                                    AffiliateSellerFinancialTransaction_MathSign : 1 ,
+                                    AffiliateSellerFinancialTransaction_Amount   : AffiliateRevenueAmount ,
+                                    AffiliateSellerFinancialTransaction_Order    : updatedOrderDocment._id ,
+                                    AffiliateSellerFinancialTransaction_Type     : "Collected"
+                                }
+                            }
+                        };
+                        AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
+                        .exec(function(err,updatedSellerDocument){
+                            if(err){
+                                return res.send({
+                                    message:err
+                                });
+                            }else if(updatedSellerDocument) {
+                                return res.send({ message : true });
+                            }
+                            else{
+                                return res.send({  message:"updated seller is null" });
+                            }
+                        })
+                        
+                    }else{
+                        return res.send({ message:"updatedDocment is null" });
                     }
-                    else{
-                        return res.send({  message:"updated seller is null" });
-                    }
-                 })
-                 
-            }else{
-                return res.send({ message:"updatedDocment is null" });
+                })
             }
         })
-        
     },
 
     returnOrderProducts: (req,res)=>{
@@ -1204,92 +1219,174 @@ module.exports={
 
         })
     },
-
-    returnOneProductFromOrder: (req,res)=>{
-        var updatedValue = {
-            $set: {
-                Order_Status : "Returned",
-                Order_AffiliateSellerRevenueAmount : req.body.Order_AffiliateSellerRevenuePercentage * (req.body.Original_Order_TotalProductSellingAmount - req.body.Order_Return_Details.Return_Product.Price) / 100
-            },
-            $inc: {
-                Order_TotalProductSellingAmount   : -1 * req.body.Order_Return_Details.Return_Product.Price ,
-                Order_TotalProductCostAmount      : -1 * req.body.Order_Return_Details.Return_Product.Cost ,
-            },
-            $push:{
-                Order_Return_Details : req.body.Order_Return_Details
-            }
-        };
-
-        Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
+    searchOrdersByWaybill: (req,res)=>{
+        
+        Order.find({ Order_ShippingWaybill: {'$regex' : req.body.Waybill , '$options' : 'i'} })
+        .populate({path:"Order_Customer",select:"Customer_Code Customer_Name "})
+        .exec((err,orders)=>{
             if(err){
                 return res.send({
                     message:err
                 })
-            }else if(updatedOrderDocment) {
-                 //we need to update store Store_Quantity  property in store model for the returned ordered product
-                let returnProduct = req.body.Order_Return_Details.Return_Product ;
-                Store.findOne({Store_Product : returnProduct.Product,Size_Variant:returnProduct.Size_Variant,Color_Variant:returnProduct.Color_Variant,                            Store_PendingQuantity : { $gte: 1} //using this instead of filtering by: Store_StoragePlace
+            }else if(orders.length >0 ) {
+                return res.json({
+                    orders : orders,
+                    message : true
                 })
-                .exec(function(err,storeDocument){
-                    console.log('storeDocument1',storeDocument)
-                    if(err){
-                        return res.send({ message3:err })
-                    }else if(storeDocument){
-                        storeDocument.Store_Quantity += returnProduct.Quantity ;
-                        console.log('storeDocument2',storeDocument)
-                        storeDocument.save(function(err,updatedStoreDocument){
-                            if(err){
-                                return res.send({ message4:err})
-                            }else {
-                                //we need to add this order to AffiliateSeller_ReturnedOrders property of affiliate seller model
+            }else{
+                return res.send({
+                    message: false
+                })
+            }
+
+        })
+    },
+    returnOneProductFromOrder: (req,res)=>{
+        Order.findById(req.body._id).exec((err,order)=>{
+            if(order) {
+                var productPrice = req.body.Order_Return_Details.Return_Products[0].Price;
+                var ReturnedAffiliateSellerAmount = (productPrice * order.Order_AffiliateSellerRevenuePercentage) /100
+                order.Order_AffiliateSellerRevenueAmount = order.Order_AffiliateSellerRevenueAmount - ReturnedAffiliateSellerAmount;
+                order.Order_TotalProductSellingAmount = order.Order_TotalProductSellingAmount - productPrice;
+                order.Order_TotalProductCostAmount = order.Order_TotalProductCostAmount - req.body.Order_Return_Details.Return_Products[0].Cost;
+                order.Order_Status = "Returned";
+                if(order.Order_Return_Details){
+                    var ReturnOrder = req.body.Order_Return_Details;
+                    delete ReturnOrder.Return_Products[0].Price;
+                    order.Order_Return_Details.push(ReturnOrder)
+                }
+                else{
+                    var ReturnOrder = req.body.Order_Return_Details;
+                    delete ReturnOrder.Return_Products[0].Price;
+                    order.Order_Return_Details = [ReturnOrder]
+                }
+                order.save(function(err,updatedOrder){
+                    Store.find({
+                        Store_Product : req.body.Order_Return_Details.Return_Products[0].Product,
+                        Size_Variant  : req.body.Order_Return_Details.Return_Products[0].Size_Variant,
+                        Color_Variant : req.body.Order_Return_Details.Return_Products[0].Color_Variant
+                    }).exec(function(err,storeProduct){
+                        var CostToAdd = req.body.Order_Return_Details.Return_Products[0].Cost; 
+                        const newProductTransaction=new ProductTransaction();
+                        newProductTransaction.ProductTransaction_Date = req.body.Order_Return_Details.Return_Date;
+                        newProductTransaction.ProductTransaction_Product = req.body.Order_Return_Details.Return_Products[0].Product;
+                        newProductTransaction.ProductTransaction_Size_Variant = req.body.Order_Return_Details.Return_Products[0].Size_Variant;
+                        newProductTransaction.ProductTransaction_Color_Variant = req.body.Order_Return_Details.Return_Products[0].Color_Variant;
+                        newProductTransaction.ProductTransaction_MathSign = 1;
+                        newProductTransaction.ProductTransaction_Type = "Return Order";
+                        newProductTransaction.ProductTransaction_Order = req.body._id;
+                        if(storeProduct.length >0){
+                            var TotalStoredQuantity = 0;
+                            storeProduct.forEach(function(storeProductItem, index){
+                                TotalStoredQuantity = TotalStoredQuantity + storeProductItem.Store_Quantity;
+                            })
+                            newProductTransaction.ProductTransaction_QuantityBeforAction = TotalStoredQuantity;
+                            newProductTransaction.ProductTransaction_CostBeforAction = storeProduct[0].Store_Cost;
+                            newProductTransaction.ProductTransaction_SellPriceOnAction = productPrice;
+                            newProductTransaction.ProductTransaction_QuantityAfterAction = TotalStoredQuantity + req.body.Order_Return_Details.Return_Products[0].Quantity;
+                            CostToAdd = ((storeProduct[0].Store_Cost * TotalStoredQuantity) + (req.body.Order_Return_Details.Return_Products[0].Cost * req.body.Order_Return_Details.Return_Products[0].Quantity))/ (TotalStoredQuantity + req.body.Order_Return_Details.Return_Products[0].Quantity)//11111;//needs modification
+                            newProductTransaction.ProductTransaction_CostAfterAction = CostToAdd;
+                            newProductTransaction.save(function(err,xx){});
+
+                            //update new cost to current Items on the store
+                            
+                            storeProduct.forEach(function(storeProductItem, index){
+                                storeProductItem.Store_Cost=CostToAdd;
+                                storeProductItem.save(function(err){});
+                            })
+
+                            //insert new store for the new incoming items
+                            let newStoreProduct = new Store();
+                            newStoreProduct.Store_Product = req.body.Order_Return_Details.Return_Products[0].Product;
+                            newStoreProduct.Size_Variant = req.body.Order_Return_Details.Return_Products[0].Size_Variant
+                            newStoreProduct.Color_Variant = req.body.Order_Return_Details.Return_Products[0].Color_Variant
+                            newStoreProduct.Store_Quantity = req.body.Order_Return_Details.Return_Products[0].Quantity
+                            newStoreProduct.Store_Cost = CostToAdd;
+                            newStoreProduct.Store_StoragePlace = null;
+                            newStoreProduct.save(function(err,savedStore){
                                 let updated ={
                                     $push :{
                                         AffiliateSeller_ReturnedOrders : {
-                                            Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
-                                            Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
-                                            Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
-                                            Order_RefrencedOrder: updatedOrderDocment._id
+                                            Order_TotalAmount : productPrice,
+                                            Order_AffiliateSellerRevenuePercentage: updatedOrder.Order_AffiliateSellerRevenuePercentage,
+                                            Order_AffiliateSellerRevenueAmount: ReturnedAffiliateSellerAmount,
+                                            Order_RefrencedOrder: updatedOrder._id
                                         },
                                         AffiliateSeller_FinancialTransactions : {
-                                            AffiliateSellerFinancialTransaction_Date : updatedOrderDocment.Order_Date ,
+                                            AffiliateSellerFinancialTransaction_Date : req.body.Order_Return_Details.Return_Date ,
                                             AffiliateSellerFinancialTransaction_MathSign : -1 ,
-                                            AffiliateSellerFinancialTransaction_Amount : returnProduct.Price * updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
-                                            AffiliateSellerFinancialTransaction_Order : updatedOrderDocment._id ,
+                                            AffiliateSellerFinancialTransaction_Amount : ReturnedAffiliateSellerAmount,
+                                            AffiliateSellerFinancialTransaction_Order : updatedOrder._id ,
                                             AffiliateSellerFinancialTransaction_Type : "return"
-
                                         }
                                     }
                                 };
-                                AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
-                                    .exec(function(err,updatedSellerDocument){
-                                        if(err){
-                                            return res.send({
-                                                    message:err
-                                        });
-                                        }else if(updatedSellerDocument) {
-                                            return res.send({ message : true });
-                                        }
-                                        else{
-                                            return res.send({  message:"updated seller is null" });
-                                        }
-                                    })
+                                AffiliateSeller.findByIdAndUpdate(updatedOrder.Order_AffiliateSeller,updated,{new:true,upsert:true}).exec(function(err,updatedSellerDocument){
+                                    if(err){
+                                        return res.send({
+                                                message:err
+                                    });
+                                    }else if(updatedSellerDocument) {
+                                        return res.send({ message : true });
+                                    }
+                                    else{
+                                        return res.send({  message:"updated seller is null" });
+                                    }
+                                })
                                     
-                                }
-                            })
-                            
-                       
-                    }
-                    else{
-                        return res.send({message : "couldnot found order product in store"})
-                    }
+                            });
+                        }else{
+                            newProductTransaction.ProductTransaction_QuantityBeforAction = 0;
+                            newProductTransaction.ProductTransaction_CostBeforAction = 0;
+                            newProductTransaction.ProductTransaction_SellPriceOnAction = productPrice;
+                            newProductTransaction.ProductTransaction_QuantityAfterAction =  req.body.Order_Return_Details.Return_Products[0].Quantity;
+                            newProductTransaction.ProductTransaction_CostAfterAction = req.body.Order_Return_Details.Return_Products[0].Cost;//needs modification
+                            newProductTransaction.save(function(){})
+                            let newStoreProduct = new Store();
+                            newStoreProduct.Store_Product = req.body.Order_Return_Details.Return_Products[0].Product;
+                            newStoreProduct.Size_Variant = req.body.Order_Return_Details.Return_Products[0].Size_Variant;
+                            newStoreProduct.Color_Variant = req.body.Order_Return_Details.Return_Products[0].Quantity;
+                            newStoreProduct.Store_Quantity = req.body.Order_Return_Details.Return_Products[0].Quantity
+                            newStoreProduct.Store_Cost = req.body.Order_Return_Details.Return_Products[0].Cost
+                            newStoreProduct.Store_StoragePlace = null;
+                            newStoreProduct.save(function(err,savedStore){
+                                //start update seller need to be midi
+                                let updated ={
+                                    $push :{
+                                        AffiliateSeller_ReturnedOrders : {
+                                            Order_TotalAmount :productPrice,
+                                            Order_AffiliateSellerRevenuePercentage: updatedOrder.Order_AffiliateSellerRevenuePercentage,
+                                            Order_AffiliateSellerRevenueAmount: ReturnedAffiliateSellerAmount,
+                                            Order_RefrencedOrder: updatedOrder._id
+                                        },
+                                        AffiliateSeller_FinancialTransactions : {
+                                            AffiliateSellerFinancialTransaction_Date : req.body.Order_Return_Details.Return_Date ,
+                                            AffiliateSellerFinancialTransaction_MathSign : -1 ,
+                                            AffiliateSellerFinancialTransaction_Amount : ReturnedAffiliateSellerAmount,
+                                            AffiliateSellerFinancialTransaction_Order : updatedOrder._id ,
+                                            AffiliateSellerFinancialTransaction_Type : "return"
+                                        }
+                                    }
+                                };
+                                AffiliateSeller.findByIdAndUpdate(updatedOrder.Order_AffiliateSeller,updated,{new:true,upsert:true}).exec(function(err,updatedSellerDocument){
+                                    if(err){
+                                        return res.send({
+                                                message:err
+                                    });
+                                    }else if(updatedSellerDocument) {
+                                        return res.send({ message : true });
+                                    }
+                                    else{
+                                        return res.send({  message:"updated seller is null" });
+                                    }
+                                })
+                            });
+                        }
+                    })
                 })
-                
-            }else{
-                return res.send({
-                    message:"updatedDocment is null"
-                });
             }
         })
+        
         
     },
         

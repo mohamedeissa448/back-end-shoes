@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var ProductDecreaseSchema = require('./general-schemas/product-decrease-schema'); 
+var ProductIncreaseSchema = require('./general-schemas/product-increase-schema'); 
 var AddressSchema = require('./general-schemas/address-schema'); 
 
 var CancelationDetailsSchema= mongoose.Schema({
@@ -25,7 +26,7 @@ var ReturnDetailsSchema= mongoose.Schema({
     },
     Return_Note                     : String,
     Return_ShippingCompanyRefNumber : String,// رقم المرتجع من شركة الشحن
-    Return_Products                 : [ProductDecreaseSchema],
+    Return_Products                 : [ProductIncreaseSchema],
     Return_HandledBy                : {
         type:mongoose.Schema.Types.ObjectId,
         ref:'ogt_users',

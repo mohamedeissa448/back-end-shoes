@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 var passwordHash = require("password-hash");
 var Order = require("../models/order-model");
+var mongoose=require('mongoose');
 module.exports={
     addAffiliateSeller:(req,res)=>{
         AffiliateSeller.getLastCode(function(err, seller) {
@@ -847,28 +848,80 @@ getFilteredCanceledOrdersByCustomerMobile :(req,res)=>{
 },
 
 getAffiliateSellerTransactionsFromDateToDate : (req,res)=>{
-  AffiliateSeller.findById(req.body._id )
-    .select("AffiliateSeller_FinancialTransactions")
-    .populate({path : "AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Order",select:"Order_Code"})
-    .exec(function(err, seller){
-        if(err){
-            return res.json({
-                message:err
-            })
-        }else if(seller) {
-          let filteredTransactions = [];
-          seller.AffiliateSeller_FinancialTransactions.forEach((transaction)=>{
-            if((transaction.AffiliateSellerFinancialTransaction_Date).getTime() >= new Date(req.body.searchDate.Start_Date).getTime() && (transaction.AffiliateSellerFinancialTransaction_Date).getTime() <= new Date(req.body.searchDate.End_Date).getTime())
-            filteredTransactions.push(transaction)
-          });
-          
-            return res.send(filteredTransactions)
-        }else{
-            return res.json({
-                message:"seller is not found"
-            })
+
+  AffiliateSeller.aggregate( [
+    { $match: { _id: mongoose.Types.ObjectId(req.body._id) } },
+    { $unwind: "$AffiliateSeller_FinancialTransactions" },
+    { $match: {
+        "AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Date": 
+        {
+            $gte:new Date(req.body.searchDate.Start_Date),
+            $lt: new Date(req.body.searchDate.End_Date)
         }
-    }); 
+      }
+    },
+    {$sort: {"AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Order": 1}},
+    {
+      $lookup:
+       {
+         from: 'ogt_orders',
+         localField: 'AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Order',
+         foreignField: '_id',
+         as: "Order"
+       }
+    },
+    { $unwind: "$Order" },
+    { $project: {
+            '_id' :'$_id',
+            'trans' : "$AffiliateSeller_FinancialTransactions",
+            'Order' : {Code:"$Order.Order_Code",OrderDate:"$Order.Order_Date"}
+        }
+    },
+    { 
+        $group: {
+            _id: '$_id',
+            sum: {$sum: { $multiply: ['$trans.AffiliateSellerFinancialTransaction_Amount','$trans.AffiliateSellerFinancialTransaction_MathSign']}},
+            count: { $sum: 1 },
+            transactions: {$push: {Trans:"$trans",Order:"$Order"}}
+        }
+    } 
+  ]).exec(function(err,data){
+      if(err)
+          return res.send({error:err,message : false});
+      else if(data){
+          if(data.length >0)
+            return res.json({SellerTransactions : data ,message : true});
+          else
+          return res.json({error : "No Data Found in This Period" ,message : false});
+      } 
+      else
+          return res.json({error : "No Seller Found" ,message : false})        
+  })
+
+
+
+  // AffiliateSeller.findById(req.body._id )
+  //   .select("AffiliateSeller_FinancialTransactions")
+  //   .populate({path : "AffiliateSeller_FinancialTransactions.AffiliateSellerFinancialTransaction_Order",select:"Order_Code"})
+  //   .exec(function(err, seller){
+  //       if(err){
+  //           return res.json({
+  //               message:err
+  //           })
+  //       }else if(seller) {
+  //         let filteredTransactions = [];
+  //         seller.AffiliateSeller_FinancialTransactions.forEach((transaction)=>{
+  //           if((transaction.AffiliateSellerFinancialTransaction_Date).getTime() >= new Date(req.body.searchDate.Start_Date).getTime() && (transaction.AffiliateSellerFinancialTransaction_Date).getTime() <= new Date(req.body.searchDate.End_Date).getTime())
+  //           filteredTransactions.push(transaction)
+  //         });
+          
+  //           return res.send(filteredTransactions)
+  //       }else{
+  //           return res.json({
+  //               message:"seller is not found"
+  //           })
+  //       }
+  //   }); 
 },
 
 checkSellerBromoCodeValidation :(req,res)=>{
