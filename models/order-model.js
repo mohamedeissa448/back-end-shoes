@@ -70,6 +70,15 @@ var OrderSchema =new mongoose.Schema({
     Order_ShippingPrice                         : Number,// get from the shipping Company contract
     Order_ShippingCost                          : Number,// get from the shipping Company contract
     Order_ShippingWaybill                       : [String],
+    Order_Shipping_Employee_Main_Note           : String,
+    Order_Shipping_Employee_Calls_Note          : {
+        type : String ,
+        default : ""
+    },
+    Order_Shipping_Employee_Calls_Number        : {
+        type    : Number ,
+        default : 0
+    },
     Customer_ShippingAddress                    : AddressSchema,
     Order_CustomerPaymentStatus                 : String, // COD, Paid
     Order_InvntoryHandlingAssignedTo            : {

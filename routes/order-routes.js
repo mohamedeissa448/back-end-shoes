@@ -44,6 +44,14 @@ router.post('/onlyChangeOrderEmployee',async function(req, res, next) {
 router.post('/assignOrderToEmployee',async function(req, res, next) {
     await(orderController.assignOrderToEmployee(req, res));
 });
+
+router.post('/saveShippingCallNote',async function(req, res, next) {
+    await(orderController.saveShippingCallNote(req, res));
+});
+
+router.post('/getShippingCallNotes',async function(req, res, next) {
+    await(orderController.getShippingCallNotes(req, res));
+});
 router.post('/shipOrderWithTheAbilityToEditOrder',async function(req, res, next) {
     await(orderController.shipOrderWithTheAbilityToEditOrder(req, res));
 });

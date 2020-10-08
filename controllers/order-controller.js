@@ -462,6 +462,51 @@ module.exports={
         
     },
 
+    getShippingCallNotes : (req,res)=>{
+        Order.findById(req.body.orderID)
+        .select("Order_Shipping_Employee_Calls_Note Order_Shipping_Employee_Calls_Number")
+        .exec(function(err,updatedDocment){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(updatedDocment) {
+                return res.json({
+                    Order_Shipping_Employee_Calls_Note : updatedDocment.Order_Shipping_Employee_Calls_Note,
+                    Order_Shipping_Employee_Calls_Number : updatedDocment.Order_Shipping_Employee_Calls_Number
+                })
+            }
+            else return res.send({message : "Order not found"})
+        })
+        
+    },
+
+    saveShippingCallNote :(req,res)=>{
+       
+        Order.findById(req.body.orderID,function(err,updatedDocment){
+            if(err){
+                return res.send({
+                    message:err
+                })
+            }else if(updatedDocment) {
+                console.log("updatedDocment.Order_Shipping_Employee_Calls_Note",updatedDocment.Order_Shipping_Employee_Calls_Note)
+                if(updatedDocment.Order_Shipping_Employee_Calls_Note)
+                    updatedDocment.Order_Shipping_Employee_Calls_Note += req.body.Call_Note;
+                else
+                    updatedDocment.Order_Shipping_Employee_Calls_Note = req.body.Call_Note;
+                let current_calls_number = updatedDocment.Order_Shipping_Employee_Calls_Number
+                console.log("current_calls_number",current_calls_number)
+                updatedDocment.Order_Shipping_Employee_Calls_Number= current_calls_number+1 || 1;
+                updatedDocment.save((err,saved)=>{
+                    if(err)return res.send(err)
+                    else
+                    return res.send({message : true,saved:saved})
+
+                })
+            }
+            else return res.send({message : "Order not found"})
+        })
+    },
     shipOrderWithTheAbilityToEditOrder : (req,res)=>{
         // we donot need to update all order document properties such as the Order_AffiliateSeller,Order_AffiliateSellerRevenuePercentage
         //as these properties were already set when the affiliate seller ordered the product
@@ -472,6 +517,7 @@ module.exports={
                 Order_ShippingWaybill : req.body.Order_ShippingWaybill,
                 Order_ShippingPrice : req.body.Order_ShippingPrice,
                 Order_ShippingCost : req.body.Order_ShippingCost,
+                Order_Shipping_Employee_Main_Note : req.body.Order_Shipping_Employee_Main_Note,
                 Order_Status: "Shipped",
                // Order_Date:req.body.Order_Date ,
                 Order_Note:req.body.Order_Note ,
