@@ -267,10 +267,12 @@ module.exports={
         .exec(function(err,orderDocument){
             if(err) return res.send(err);
             else if(orderDocument){
+                console.log("---------=-=-=-=-")
+                
                 //first we need to delete the product in property Order_Products of the order document
-                orderDocument.Order_Products = orderDocument.Order_Products.filter(x => {
-                    x._id !== req.body.deletedProduct.Product
-                })
+                const indxToDelete = orderDocument.Order_Products.findIndex(productToDelete => String(productToDelete._id) === req.body.deletedProduct._id);
+                orderDocument.Order_Products.splice(indxToDelete, 1);
+                console.log(orderDocument.Order_Products);
                 //second we need to update Order_AffiliateSellerRevenueAmount
                 var amountToDeduct = (req.body.deletedProduct.Total_Price * req.body.sellerMoneyDetails.Order_AffiliateSellerRevenuePercentage)/100;
                 orderDocument.Order_AffiliateSellerRevenueAmount -=  amountToDeduct;
@@ -363,58 +365,49 @@ module.exports={
         Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true},function(err,updatedOrderDocment){
             if(err){
                 return res.send({
-                    message1:err
+                    status: false,
+                    message:err
                 })
             }else if(updatedOrderDocment) {
-                var count = 0 ;
-                 //we need to update  Store_PendingQuantity  property in store model for each ordered product
-                 updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
-                    Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
-                    .exec(function(err,storeDocument){
-                        console.log('storeDocument1',storeDocument)
-                        if(err){
-                            return res.send({
-                                message2:err
-                            })
-                        }else if(storeDocument){
-                            storeDocument.Store_PendingQuantity += orderProduct.Quantity ;
-                            console.log('storeDocument2',storeDocument)
-                             storeDocument.save(function(err,updatedStoreDocument){
-                                if(err){
-                                    return res.send({
-                                        message3:err
-                                    })
-                                }else {
-                                    count ++ ;
-                                    if(count == updatedOrderDocment.Order_Products.length){
-                                        //remove order from affiliate seller AffiliateSeller_CanceledOrders property
-                                        AffiliateSeller.findById(updatedOrderDocment.Order_AffiliateSeller)
-                                        .exec(function(err,sellerDocument){
-                                            if(err) return res.json({message :err})
-                                            else if(sellerDocument){
-                                                sellerDocument.AffiliateSeller_CanceledOrders.forEach((element)=>{
-                                                    if(element.Order_RefrencedOrder == updatedOrderDocment._id){
-                                                        sellerDocument.AffiliateSeller_CanceledOrders.splice( element, 1);
-                                                    }
-                                                })
-                                                sellerDocument.save((function(err,updatedSellerDocument){
-                                                    if(err) return res.json({message :err})
-                                                    else 
-                                                    return res.json({message : true})
-                                                }))
-                                               
-                                            }
-                                            else return res.json({message : false})
-                                        })
-                                        return res.send({ message : true});
-                                    }
-                                }
-                            })
-                        }else return res.json({message : "store document not found"})
+                AffiliateSeller.update({ _id: updatedOrderDocment.Order_AffiliateSeller },
+                    {
+                        $pull: {
+                            AffiliateSeller_CanceledOrders:{  Order_RefrencedOrder: req.body._id}
+                        }
                     })
-                })
+                .exec(function(err,sellerDocument){
+                    var count = 0 ;
+                    updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
+                        Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
+                        .exec(function(err,storeDocument){
+                            if(err){
+                                return res.send({
+                                    status: false,
+                                    message:err
+                                })
+                            }else if(storeDocument){
+                                storeDocument.Store_PendingQuantity += orderProduct.Quantity ;
+                                storeDocument.save(function(err,updatedStoreDocument){
+                                    if(err){
+                                        return res.send({
+                                            status: false,
+                                            message:err
+                                        })
+                                    }else {
+                                        count ++ ;
+                                        if(count == updatedOrderDocment.Order_Products.length){
+                                            //remove order from affiliate seller AffiliateSeller_CanceledOrders property
+                                            return res.send({status: true, message : true});
+                                        }
+                                    }
+                                })
+                            }else return res.json({status: false,message : "store document not found"})
+                        })
+                    })
+                })                 
             }else{
                 return res.send({
+                    status: false,
                     message:"updatedDocment is null"
                 });
             }
@@ -556,7 +549,7 @@ module.exports={
     cancelOrder: (req,res)=>{
         var updatedValue = {
             $set: {
-                Order_Status : req.body.Order_Status,
+                Order_Status : "Cancelled",
                 Order_CancelationDetails : req.body.Order_CancelationDetails,
                 Order_CanBeFollowedUp    : req.body.Order_CanBeFollowedUp
             }
@@ -565,67 +558,77 @@ module.exports={
         Order.findByIdAndUpdate(req.body._id,updatedValue,{new:true,upsert:true},function(err,updatedOrderDocment){
             if(err){
                 return res.send({
+                    status: false,
                     message:err
                 })
             }else if(updatedOrderDocment) {
-                var count = 0 ;
                  //we need to update store Store_PendingQuantity  property in store model for each ordered product
-                 updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
-                    Store.findOne({Store_Product : orderProduct.Product,Size_Variant:orderProduct.Size_Variant,Color_Variant:orderProduct.Color_Variant})
-                    .exec(function(err,storeDocument){
-                        console.log('storeDocument1',storeDocument)
-                        if(err){
-                            return res.send({
-                                message3:err
-                            })
-                        }else if(storeDocument){
-                            storeDocument.Store_PendingQuantity -= orderProduct.Quantity ;
-                            console.log('storeDocument2',storeDocument)
-                             storeDocument.save(function(err,updatedStoreDocument){
+                 let updated ={
+                    $push :{
+                        AffiliateSeller_CanceledOrders : {
+                            Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
+                            Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
+                            Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
+                            Order_RefrencedOrder: updatedOrderDocment._id
+                        }
+                    }
+                };
+                AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
+                    .exec(function(err,updatedSellerDocument){
+                    if(err){
+                        return res.send({
+                            status: false,
+                            message:err
+                        });
+                    }else if(updatedSellerDocument) {
+                        var Count = 0;
+                        updatedOrderDocment.Order_Products.forEach((orderProduct)=>{
+                            console.log(orderProduct.Product)
+                            console.log(orderProduct.Size_Variant)
+                            console.log(orderProduct.Color_Variant)
+                            Store.findOne({
+                                Store_Product : orderProduct.Product,
+                                Size_Variant:orderProduct.Size_Variant,
+                                Color_Variant:orderProduct.Color_Variant,
+                                Store_PendingQuantity: {$gte: 1} 
+                            }).exec(function(err,storeDocument){
                                 if(err){
                                     return res.send({
-                                        message4:err
+                                        status: false,
+                                        message:err
                                     })
-                                }else {
-                                    count ++ ;
-                                    if(count == updatedOrderDocment.Order_Products.length){
-                                             //we need to add this order to AffiliateSeller_CanceledOrders property of affiliate seller model
-                                             let updated ={
-                                                $push :{
-                                                    AffiliateSeller_CanceledOrders : {
-                                                    Order_TotalAmount: updatedOrderDocment.Order_TotalProductSellingAmount ,
-                                                    Order_AffiliateSellerRevenuePercentage: updatedOrderDocment.Order_AffiliateSellerRevenuePercentage,
-                                                    Order_AffiliateSellerRevenueAmount: updatedOrderDocment.Order_AffiliateSellerRevenueAmount,
-                                                    Order_RefrencedOrder: updatedOrderDocment._id
-                                                   }
-                                                }
-                                            };
-                                            AffiliateSeller.findByIdAndUpdate(updatedOrderDocment.Order_AffiliateSeller,updated,{new:true,upsert:true})
-                                            .exec(function(err,updatedSellerDocument){
-                                            if(err){
-                                                return res.send({
-                                                    message:err
-                                                });
-                                            }else if(updatedSellerDocument) {
-                                                return res.send({ message : true });
-                                            }
-                                            else{
-                                                return res.send({  message:"updated seller is null" });
-                                            }
+                                }
+                                else if(storeDocument){
+                                    Count ++;
+                                    storeDocument.Store_PendingQuantity -= orderProduct.Quantity ;
+                                    storeDocument.save(function(err,updatedStoreDocument){
+                                        if(err){
+                                            console.log(err)
+                                            return res.send({
+                                                status: false,
+                                                message:err
                                             })
-                                    }
+                                        }else {
+                                            if(Count == updatedOrderDocment.Order_Products.length){
+                                                return res.send({ status: true, message : "true" });
+                                            }
+                                        }
+                                    }) 
+                                }
+                                else{
+                                    return res.send({ status: false, message : "couldnot found order product in store"})
                                 }
                             })
-                            
-                       
+                        });
                     }
                     else{
-                        return res.send({message : "couldnot found order product in store"})
+                        return res.send({ status: false, message:"updated seller is null" });
                     }
-                    })
-                });
+                })
+                 
             }else{
                 return res.send({
+                    status: false, 
                     message:"updatedDocment is null"
                 });
             }
