@@ -48,10 +48,10 @@ module.exports={
                                 Order_RefrencedOrder: document._id
                             });
                             //we need to add bromCode if existed in request body
-                            if(req.body.chosedBromoCode){
+                            if(req.body.BromCode_ID){
                                 let BromCodeIsFound = false
                                 seller.AffiliateSeller_BromoCodes_Used.forEach((bromoCode)=>{
-                                    if(req.body.chosedBromoCode._id == bromoCode.BromCode_ID){
+                                    if(req.body.BromCode_ID == bromoCode.BromCode_ID){
                                         //increment number of used times by 1
                                         bromoCode.Used_Number_Of_Times ++ ;
                                         BromCodeIsFound = true;
@@ -60,7 +60,7 @@ module.exports={
                                 if(!BromCodeIsFound){
                                     //we need to push object to the array
                                     seller.AffiliateSeller_BromoCodes_Used.push({
-                                        BromCode_ID          : req.body.chosedBromoCode._id ,
+                                        BromCode_ID          : req.body.BromCode_ID ,
                                         Used_Number_Of_Times : 1
                                     })
                                 }

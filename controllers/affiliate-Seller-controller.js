@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const passport = require("passport");
 var passwordHash = require("password-hash");
 var Order = require("../models/order-model");
+var BromoCode = require("../models/bromo-code-model")
 var mongoose=require('mongoose');
 module.exports={
     addAffiliateSeller:(req,res)=>{
@@ -925,38 +926,55 @@ getAffiliateSellerTransactionsFromDateToDate : (req,res)=>{
 },
 
 checkSellerBromoCodeValidation :(req,res)=>{
-  AffiliateSeller.findById(req.body.affiliateSellerId )
-    .select("AffiliateSeller_BromoCodes_Used")
-    .exec(function(err, seller){
-        if(err){
-            return res.json({
-                message:err
-            })
-        }else if(seller) {
-          let bromoCodeIsFound = false ;
-          let bromoCodeCanBeUsed = false ;
-          seller.AffiliateSeller_BromoCodes_Used.forEach((bromCode)=>{
-            if( bromCode._id == req.body.BromoCodeId){
-              bromoCodeIsFound = true ;
-              if(bromCode.Used_Number_Of_Times < req.body.BromoCode_Usage_Times){
-                // it means seller can still use this bromoCode
-                bromoCodeCanBeUsed = true
-              }
+  BromoCode.findOne( {BromoCode_Description : req.body.BromoCode_Description})
+  .exec((err,bromoCodeDocument)=>{
+    if(err)return res.send({message :err})
+    else if(bromoCodeDocument){
+      AffiliateSeller.findById(req.body.affiliateSellerId )
+      .select("AffiliateSeller_BromoCodes_Used")
+      .exec(function(err, seller){
+          if(err){
+              return res.json({
+                  message:err
+              })
+          }else if(seller) {
+            let bromoCodeIsFound = false ;
+            let bromoCodeCanBeUsed = false ;
+            let currentDate = new Date().getTime();
+            console.log("currentDate",currentDate);
+            console.log("BromoCode_End_Date",new Date(bromoCodeDocument.BromoCode_End_Date).getTime());
+            let notExpired = currentDate -new Date(bromoCodeDocument.BromoCode_End_Date).getTime() < 0 ;
+            //for a bromcode to be valid,we need BromoCode_End_Date is still coming,then we check BromoCode_Usage_Times, if it is equal to 0 or seller number of times using this bromocode is less than the number of times in bromocode document
+            if(!notExpired){
+              return res.send({message : false ,isExpired : true})
+            }else{
+              seller.AffiliateSeller_BromoCodes_Used.forEach((bromCode)=>{
+                if( bromCode.BromCode_ID == bromoCodeDocument._id){
+                  bromoCodeIsFound = true ;
+                  //check bromCode validity
+                  if(  bromoCodeDocument.BromoCode_Usage_Times == 0 || bromCode.Used_Number_Of_Times < bromoCodeDocument.BromoCode_Usage_Times){
+                    // it means seller can still use this bromoCode
+                    bromoCodeCanBeUsed = true
+                  }
+                }
+              });
+              if(bromoCodeIsFound && bromoCodeCanBeUsed )
+                return res.send({message : true , BromoCode_Discount : bromoCodeDocument.BromoCode_Discount,BromCode_ID : bromoCodeDocument._id })
+              else if(!bromoCodeIsFound)//means  it is first time for this seller to use this bromocode
+                return res.send({message : true , BromoCode_Discount : bromoCodeDocument.BromoCode_Discount,BromCode_ID : bromoCodeDocument._id})
             }
-          });
-          if(bromoCodeIsFound && bromoCodeCanBeUsed )
-            return res.send({message : true})
-          else if(!bromoCodeIsFound)
-            return res.send({message : true})
-          else
-          return res.send({message : false})
-
-        }else{
-            return res.json({
-                message:"seller is not found"
-            })
-        }
-    }); 
+            
+  
+          }else{
+              return res.json({
+                  message:"seller is not found"
+              })
+          }
+      }); 
+    }else
+    return res.send({notFound : true,message : "bromo code not found!"})
+  })
+ 
 }
    
 }
