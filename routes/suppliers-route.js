@@ -13,6 +13,10 @@ router.post('/editSupplier',async function(req, res, next) {
 router.get('/getAll',async function(req, res, next) {
     await(supplierController.getAll(req, res));
 });
+//for search like autoComplete.we donot need all supplier properties
+router.get('/getAllMinified',async function(req, res, next) {
+    await(supplierController.getAllMinified(req, res));
+});
 
 router.get('/getAllActive',async function(req, res, next) {
     await(supplierController.getAllActive(req, res));
@@ -34,5 +38,15 @@ router.post('/getAllSupplierTransactions',async function(req, res, next) {
 });
 router.post('/deleteTransactionFromFinancialTransactions',async function(req, res, next) {
     await(supplierController.deleteTransactionFromFinancialTransactions(req, res));
+});
+/**************fourth report */
+
+router.post('/getAllSupplierBillsAndBillReturnedFromDateToDate',async function(req, res, next) {
+    await(supplierController.getAllSupplierBillsAndBillReturnedFromDateToDate(req, res));
+});
+/**************fifth report */
+
+router.post('/getAllSupplierBillsAndBillReturned',async function(req, res, next) {
+    await(supplierController.getAllSupplierBillsAndBillReturned(req, res));
 });
 module.exports = router;

@@ -13,7 +13,7 @@ var SupplierFinancialTransactionSchema =new mongoose.Schema({
       type:mongoose.Schema.Types.ObjectId,
       ref:'ogt_bill'
   },
-  SupplierFinancialTransaction_BillReturn                : { // filled if Bill return
+  SupplierFinancialTransaction_BillReturn                : { // filled if Return Bill
       type:mongoose.Schema.Types.ObjectId,
       ref:'ogt_bill_return'
   },
@@ -22,7 +22,7 @@ var SupplierFinancialTransactionSchema =new mongoose.Schema({
     ref:'ogt_supplier_payment'
   },
   
-  SupplierFinancialTransaction_Type                      : String, // Bill, Bill return, Payment
+  SupplierFinancialTransaction_Type                      : String, // Bill, Return Bill, Payment
 });
 
 var SupplierSchema = mongoose.Schema(

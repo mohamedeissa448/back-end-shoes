@@ -1,4 +1,5 @@
 var Supplier=require("../models/supplier-model");
+var mongoose=require('mongoose');
 
 module.exports={
     addSupplier:(req,res)=>{
@@ -104,6 +105,25 @@ module.exports={
 
         })
     },
+
+    getAllMinified :(req,res)=>{
+      Supplier.find({})
+      .select("Supplier_Code Supplier_Name")
+      .exec((err,suppliers)=>{
+          if(err){
+              return res.send({
+                  message:err
+              })
+          }else if(suppliers) {
+              return res.send(suppliers)
+          }else{
+              return res.send({
+                  message:"suppliers are null"
+              })
+          }
+
+      })
+  },
 
     getAllActive:(req,res)=>{
         Supplier.find({Supplier_IsActive:true})
@@ -237,4 +257,136 @@ module.exports={
         });
       },
   
+
+      //fourth report
+      getAllSupplierBillsAndBillReturnedFromDateToDate :(req,res) => {
+
+        Supplier.aggregate( [
+          { $match: { _id: mongoose.Types.ObjectId(req.body._id) } },
+          { $unwind: "$Supplier_FinancialTransaction" },
+          { $match: {
+              "Supplier_FinancialTransaction.SupplierFinancialTransaction_Date": 
+              {
+                  $gte:new Date(req.body.searchDate.Start_Date),
+                  $lt: new Date(req.body.searchDate.End_Date)
+              },
+              $or:[{
+                "Supplier_FinancialTransaction.SupplierFinancialTransaction_Type" : "Bill",
+                "Supplier_FinancialTransaction.SupplierFinancialTransaction_Type" : "Return Bill",
+              }]
+              
+            }
+          },
+          {$sort: {"Supplier_FinancialTransaction.SupplierFinancialTransaction_Bill": 1}},
+          {
+            $lookup:
+             {
+               from: 'ogt_bill',
+               localField: 'Supplier_FinancialTransaction.SupplierFinancialTransaction_Bill',
+               foreignField: '_id',
+               as: "Bill"
+             },
+             $lookup:
+             {
+               from: 'ogt_bill_return',
+               localField: 'Supplier_FinancialTransaction.SupplierFinancialTransaction_BillReturn',
+               foreignField: '_id',
+               as: "BillReturn"
+             }
+
+          },
+          { $unwind: "$Bill" },
+          { $unwind: "$BillReturn" },
+          { $project: {
+                  '_id' :'$_id',
+                  'trans' : "$Supplier_FinancialTransaction",
+                  'Bill' : {Code:"$Bill.Bill_Code",BillDate:"$Bill.Bill_Date"},
+                  'BillReturn' : {Code:"$BillReturn.BillReturn_Code",BillDate:"$BillReturn.BillReturn_Date"}
+              }
+          },
+          { 
+              $group: {
+                  _id: '$_id',
+                  sum: {$sum: { $multiply: ['$trans.SupplierFinancialTransaction_Amount','$trans.SupplierFinancialTransaction_MathSign']}},
+                  count: { $sum: 1 },
+                  transactions: {$push: {Trans:"$trans",Bill:"$Bill",BillReturn :"$BillReturn"}}
+              }
+          } 
+        ]).exec(function(err,data){
+            if(err)
+                return res.send({error:err,message : false});
+            else if(data){
+                if(data.length >0)
+                  return res.json({SupplierTransactions : data ,message : true});
+                else
+                return res.json({error : "No Data Found in This Period" ,message : false});
+            } 
+            else
+                return res.json({error : "No Supplier Found" ,message : false})        
+        })
+      },
+
+       //fifth report
+       getAllSupplierBillsAndBillReturned :(req,res) => {
+
+        Supplier.aggregate( [
+          { $match: { _id: mongoose.Types.ObjectId(req.body._id) } },
+          { $unwind: "$Supplier_FinancialTransaction" },
+          { $match: {
+              
+              $or:[{
+                "Supplier_FinancialTransaction.SupplierFinancialTransaction_Type" : "Bill",
+                "Supplier_FinancialTransaction.SupplierFinancialTransaction_Type" : "Return Bill",
+              }]
+              
+            }
+          },
+          {$sort: {"Supplier_FinancialTransaction.SupplierFinancialTransaction_Bill": 1}},
+          {
+            $lookup:
+             {
+               from: 'ogt_bill',
+               localField: 'Supplier_FinancialTransaction.SupplierFinancialTransaction_Bill',
+               foreignField: '_id',
+               as: "Bill"
+             },
+             $lookup:
+             {
+               from: 'ogt_bill_return',
+               localField: 'Supplier_FinancialTransaction.SupplierFinancialTransaction_BillReturn',
+               foreignField: '_id',
+               as: "BillReturn"
+             }
+
+          },
+          { $unwind: "$Bill" },
+          { $unwind: "$BillReturn" },
+          { $project: {
+                  '_id' :'$_id',
+                  'trans' : "$Supplier_FinancialTransaction",
+                  'Bill' : {Code:"$Bill.Bill_Code",BillDate:"$Bill.Bill_Date"},
+                  'BillReturn' : {Code:"$BillReturn.BillReturn_Code",BillDate:"$BillReturn.BillReturn_Date"}
+              }
+          },
+          { 
+              $group: {
+                  _id: '$_id',
+                  sum: {$sum: { $multiply: ['$trans.SupplierFinancialTransaction_Amount','$trans.SupplierFinancialTransaction_MathSign']}},
+                  count: { $sum: 1 },
+                  transactions: {$push: {Trans:"$trans",Bill:"$Bill",BillReturn :"$BillReturn"}}
+              }
+          } 
+        ]).exec(function(err,data){
+            if(err)
+                return res.send({error:err,message : false});
+            else if(data){
+                if(data.length >0)
+                  return res.json({SupplierTransactions : data ,message : true});
+                else
+                return res.json({error : "No Data Found" ,message : false});
+            } 
+            else
+                return res.json({error : "No Supplier Found" ,message : false})        
+        })
+      }
 }
